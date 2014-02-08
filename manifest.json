@@ -3,7 +3,7 @@
 
 	"name": "Alba Prettify",
 	"description": "This extension improves Alba's territory printing output.",
-	"version": "0.1.2",
+	"version": "0.1.3",
 
 	"icons": {
 		"16": "icon16.png",

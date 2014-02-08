@@ -1,10 +1,10 @@
 (function() {
-	// Reorder smaller map so it doesn't take up extra space
+	// Reorder smaller map so it doesn't take up extra space.
 	var smallMap = document.getElementsByClassName("overview")[0];
 	var pSubtitle = smallMap.previousSibling.previousSibling;
 	smallMap.parentNode.insertBefore(smallMap, pSubtitle);
 	
-	// Duplicate territory name
+	// Duplicate territory name.
 	var smallMap = document.getElementsByClassName("overview")[0];
 	var title = smallMap.previousSibling.previousSibling;
 	var bigMap = title.previousSibling;
@@ -12,7 +12,7 @@
 	title2.children[1].innerText += ' Map';
 	title.parentNode.insertBefore(title2, bigMap);
 	
-	// Remove "Name" in "Name & Telephone"
+	// Remove "Name" in "Name & Telephone".
 	var addressTable = document.getElementsByClassName("addresses")[0];
 	var thead = addressTable.getElementsByTagName('thead')[0];
 	var ths = thead.getElementsByTagName('th');
@@ -23,7 +23,7 @@
 	  }
 	}
 	
-	// Do not display names
+	// Do not display names.
 	var addressTable = document.getElementsByClassName("addresses")[0];
 	var tbody = addressTable.getElementsByTagName('tbody')[0];
 	var trs = tbody.getElementsByTagName('tr');

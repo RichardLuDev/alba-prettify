@@ -97,14 +97,14 @@
 	bigMap.setAttribute('SRC', mapSrc);
 
 	// Reorder smaller map so it doesn't take up extra space.
-	var smallMap = document.getElementsByClassName("overview")[0];
+	/*var smallMap = document.getElementsByClassName("overview")[0];
 	var pSubtitle = smallMap.previousSibling.previousSibling;
-	smallMap.parentNode.insertBefore(smallMap, pSubtitle);
+	smallMap.parentNode.insertBefore(smallMap, pSubtitle);*/
 	
 	// Duplicate territory name.
 	var smallMap = document.getElementsByClassName("overview")[0];
 	var title = smallMap.previousSibling;
-	if (title.tagName != 'H1') {
+	while (title.tagName != 'H1') {
 		// Accomodate optional territory "Notes".
 		title = title.previousSibling;
 	}
@@ -113,15 +113,46 @@
 	title2.children[1].innerText += ' Map';
 	title.parentNode.insertBefore(title2, bigMap);
 	
+	// Add new legend
+	var smallMap = document.getElementsByClassName("overview")[0];
+	var firstLegend = smallMap.nextSibling;
+	var nn = firstLegend.cloneNode(true);
+	nn.children[0].innerText = 'NN';
+	nn.children[1].innerText = 'New Number';
+	nn.childNodes[1].textContent = ' 新地址 ';
+	var nc = nn.cloneNode(true);
+	nc.children[0].innerText = 'NC';
+	nc.children[1].innerText = 'Not Chinese (does not look Chinese)';
+	nc.childNodes[1].textContent = ' 不是中国人 ';
+	var ncs = nn.cloneNode(true);
+	ncs.children[0].innerText = 'NCS';
+	ncs.children[1].innerText = 'Not Chinese Speaking (looks Chinese but doesn\'t speak it)';
+	ncs.childNodes[1].textContent = ' 看似中国人但不说中文 ';
+	var br = smallMap.previousSibling;
+	br.parentNode.insertBefore(nn, br);
+	br.parentNode.insertBefore(nc, br);
+	br.parentNode.insertBefore(ncs, br);
+	
+	// Remove old legend and small map
+	var smallMap = document.getElementsByClassName("overview")[0];
+	var container = smallMap.parentNode;
+	var next = smallMap.previousSibling;
+	while (next && next.tagName !== 'TABLE') {
+		var toRemove = next;
+		next = next.nextSibling;
+		container.removeChild(toRemove);
+	}
+	
 	// Remove "Name" in "Name & Telephone".
 	var addressTable = document.getElementsByClassName("addresses")[0];
 	var thead = addressTable.getElementsByTagName('thead')[0];
 	var ths = thead.getElementsByTagName('th');
 	for (var i = 0; i < ths.length; ++i) {
-	  if (ths[i].innerText === "NAME & TELEPHONE") {
-		ths[i].innerText = "TELEPHONE";
-		break;
-	  }
+		//console.log(ths[i].innerText);
+		if (ths[i].innerText === "NAME & TELEPHONE" || ths[i].innerText === "Name & Telephone") {
+			ths[i].innerText = "TELEPHONE";
+			break;
+		}
 	}
 	
 	// Do not display names.

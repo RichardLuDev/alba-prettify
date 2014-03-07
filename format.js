@@ -167,8 +167,13 @@
 	for (var i = 0; i < trs.length; ++i) {
 	  if (trs[i].children.length >= 4) {
 		var td = trs[i].children[3];
-		if (td.children.length >= 2 && td.children[0].tagName == 'STRONG') {
+		if (td.children.length >= 2 && td.children[0].tagName === 'STRONG') {
 			td.removeChild(td.children[0]);
+		}
+		var lang = trs[i].children[2];
+		if (lang.innerHTML.indexOf("Chinese") !== -1) {
+			var newLang = lang.innerHTML.split(" ")[1];
+			lang.innerHTML = '<strong>' + newLang + '</strong>';
 		}
 	  }
 	}

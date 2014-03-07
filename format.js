@@ -128,10 +128,15 @@
 	ncs.children[0].innerText = 'NCS';
 	ncs.children[1].innerText = 'Not Chinese Speaking (looks Chinese but doesn\'t speak it)';
 	ncs.childNodes[1].textContent = ' 看似中国人但不说中文 ';
+	var dnc = nn.cloneNode(true);
+	dnc.children[0].innerText = 'DNC';
+	dnc.children[1].innerText = 'Do Not Call';
+	dnc.childNodes[1].textContent = ' 住户请我们不要再来 ';
 	var br = smallMap.previousSibling;
 	br.parentNode.insertBefore(nn, br);
 	br.parentNode.insertBefore(nc, br);
 	br.parentNode.insertBefore(ncs, br);
+	br.parentNode.insertBefore(dnc, br);
 	
 	// Remove old legend and small map
 	var smallMap = document.getElementsByClassName("overview")[0];

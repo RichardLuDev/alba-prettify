@@ -108,10 +108,10 @@
 		// Accomodate optional territory "Notes".
 		title = title.previousSibling;
 	}
-	var bigMap = title.previousSibling;
+	var bigMap = document.getElementsByClassName("map")[0];
 	var title2 = title.cloneNode(true);
 	title2.children[1].innerText += ' Map';
-	title.parentNode.insertBefore(title2, bigMap);
+	bigMap.parentNode.parentNode.insertBefore(title2, bigMap.parentNode);
 	
 	// Add new legend
 	var smallMap = document.getElementsByClassName("overview")[0];

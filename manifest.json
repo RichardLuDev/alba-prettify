@@ -3,7 +3,7 @@
 
 	"name": "Alba Prettify",
 	"description": "This extension improves Alba's territory printing output.",
-	"version": "0.2.2",
+	"version": "0.3",
 
 	"icons": {
 		"16": "icon16.png",
@@ -17,7 +17,10 @@
 
 	"content_scripts": [
 		{
-			"matches": ["http://www.baseloc.com/alba/print/*"],
+			"matches": [
+				"http://www.baseloc.com/alba/print/*",
+				"http://www.baseloc.com/alba/campaign/*"
+			],
 			"css": ["styles.css"],
 			"js": ["format.js"],
 			"run_at": "document_end"

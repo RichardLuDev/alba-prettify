@@ -55,7 +55,7 @@
 		};
 		var DeltaLatLon = proj.fromPointToLatLng(DeltaPx);
 		return DeltaLatLon;
-	}
+	}*/
 	
 	var bigMap = document.getElementsByClassName("map")[0];
 	var src = bigMap.getAttribute('SRC').split('?');
@@ -85,7 +85,55 @@
 		}
 		return b;
 	};
-	var params = parseQueryString(src);*/
+	var params = parseQueryString(src);
+	var markers = params.markers;
+	if (typeof markers === 'string') {
+		var vals = markers.split('|');
+		markers = [''];
+		var initial = '';
+		for (var i=0;i<vals.length;i++) {
+			if (vals[i][0] < '1' || vals[i][0] > '9') {
+				initial += vals[i] + '|';
+			} else {
+				markers.push(vals[i]);
+			}
+		}
+		markers[0] = initial;
+	}
+	var avgX = 0, avgY = 0;
+	for (var i=1;i<markers.length;i++) {
+		var vals = markers[i].split('|');
+		var obj = {};
+		for (var j=0;j<vals.length;j++) {
+			if (vals[j].indexOf(',') !== -1) {
+				var v = vals[j].split(',');
+				obj.x = parseFloat(v[0]);
+				obj.y = parseFloat(v[1]);
+				avgX += obj.x;
+				avgY += obj.y;
+			} else {
+				obj[j] = vals[j];
+			}
+		}
+		markers[i] = obj;
+	}
+	if (markers.length > 1) {
+		avgX /= markers.length - 1;
+		avgY /= markers.length - 1;
+	}
+	
+	// Make separate density map.
+	var bigMap = document.getElementsByClassName("map")[0];
+	var newMap = bigMap.cloneNode(true);
+	var mapSrc = newMap.getAttribute('SRC');
+	mapSrc = mapSrc.replace('&path=', '&path=').replace(/markers=[^&]+&?/g, '').replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
+	var markerString = '&markers=size:tiny|color:black';
+	for (var i=1;i<markers.length;i++) {
+		markerString += '|' + markers[i].x.toString() + ',' + markers[i].y.toString();
+	}
+	mapSrc += markerString;
+	newMap.setAttribute('SRC', mapSrc);
+	bigMap.parentNode.insertBefore(newMap, bigMap.nextSibling);
 	
 	// Fix map.
 	var bigMap = document.getElementsByClassName("map")[0];

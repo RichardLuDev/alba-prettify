@@ -1,61 +1,55 @@
 ﻿(function() {
-	// http://networkprogramming.wordpress.com/2013/09/03/exceeding-the-maximum-size-for-google-static-maps/
-	/*var MERCATOR_RANGE = 256;
-
-	var bound = function (value, opt_min, opt_max) {
-		if (opt_min != null) value = Math.max(value, opt_min);
-		if (opt_max != null) value = Math.min(value, opt_max);
-		return value;
-	}
-
-	var degreesToRadians = function (deg) {
-		return deg * (Math.PI / 180);
-	}
-
-	var radiansToDegrees = function (rad) {
-		return rad / (Math.PI / 180);
-	}
-
-	var MercatorProjection = function () {
-		this.pixelOrigin_ = {x: MERCATOR_RANGE / 2, y: MERCATOR_RANGE / 2};
-		this.pixelsPerLonDegree_ = MERCATOR_RANGE / 360;
-		this.pixelsPerLonRadian_ = MERCATOR_RANGE / (2 * Math.PI);
-	};
-
-	MercatorProjection.prototype.fromLatLngToPoint = function(latLng) {
-		var me = this;
-
-		var point = {x:0,y:0};
-
-		var origin = me.pixelOrigin_;
-		point.x = origin.x + latLng.lng * me.pixelsPerLonDegree_;
-		// NOTE(appleton): Truncating to 0.9999 effectively limits latitude to
-		// 89.189. This is about a third of a tile past the edge of the world tile.
-		var siny = bound(Math.sin(degreesToRadians(latLng.lat)), -0.9999, 0.9999);
-		point.y = origin.y + 0.5 * Math.log((1 + siny) / (1 - siny)) * -me.pixelsPerLonRadian_;
-		return point;
-	};
-
-	MercatorProjection.prototype.fromPointToLatLng = function(point) {
-		var me = this;
-		var origin = me.pixelOrigin_;
-		var lng = (point.x - origin.x) / me.pixelsPerLonDegree_;
-		var latRadians = (point.y - origin.y) / -me.pixelsPerLonRadian_;
-		var lat = radiansToDegrees(2 * Math.atan(Math.exp(latRadians)) - Math.PI / 2);
-		return {lat:lat, lng:lng};
-	};
+	var all_url = window.location.href + '&nv';
+	var table = document.createElement('div');
+	$(table).load(all_url + ' .addresses', function() {
+		var subheading = document.createElement('h2');
+		subheading.innerText = 'Non-Chinese Calls';
+		table.insertBefore(subheading, table.firstChild);
 	
-	var GetTileDelta = function (center,zoom,mapWidth,mapHeight,delta){
-		var proj = new MercatorProjection();
-		var scale = Math.pow(2,zoom);
-		var centerPx = proj.fromLatLngToPoint(center);
-		var DeltaPx = {
-			x: (centerPx.x + ((mapWidth / scale) * delta.x)) ,
-			y: (centerPx.y + ((mapHeight/ scale) * delta.y))
-		};
-		var DeltaLatLon = proj.fromPointToLatLng(DeltaPx);
-		return DeltaLatLon;
-	}*/
+		var addressTables = document.getElementsByClassName("addresses");
+		
+		for (var idx = addressTables.length - 1; idx >= 0; idx--) {
+			var addressTable = addressTables[idx];
+			
+			// Remove "Name" in "Name & Telephone".
+			var thead = addressTable.getElementsByTagName('thead')[0];
+			var ths = thead.getElementsByTagName('th');
+			for (var i = 0; i < ths.length; ++i) {
+				//console.log(ths[i].innerText);
+				if (ths[i].innerText === "NAME & TELEPHONE" || ths[i].innerText === "Name & Telephone") {
+					ths[i].innerText = "TELEPHONE";
+					break;
+				}
+			}
+			
+			// Do not display names.
+			var tbody = addressTable.getElementsByTagName('tbody')[0];
+			var trs = tbody.getElementsByTagName('tr');
+			for (var i = trs.length - 1; i >= 0; --i) {
+			  if (trs[i].children.length >= 4) {
+				var td = trs[i].children[3];
+				if (td.children.length >= 2 && td.children[0].tagName === 'STRONG') {
+					td.removeChild(td.children[0]);
+				}
+				if (idx === 1) {
+					var td = trs[i].children[0];
+					td.removeChild(td.children[0]);
+					trs[i].removeChild(trs[i].children[6]);
+				}
+				var lang = trs[i].children[2];
+				if (lang.innerHTML.indexOf("Chinese") !== -1) {
+					if (idx === 0) {
+						var newLang = lang.innerHTML.split(" ")[1];
+						lang.innerHTML = '<strong>' + newLang + '</strong>';
+					} else {
+						tbody.removeChild(trs[i]);
+					}
+				}
+			  }
+			}
+		}
+	});
+	$('.card').append(table);
 	
 	var bigMap = document.getElementsByClassName("map")[0];
 	var src = bigMap.getAttribute('SRC').split('?');
@@ -194,35 +188,5 @@
 		var toRemove = next;
 		next = next.nextSibling;
 		container.removeChild(toRemove);
-	}
-	
-	// Remove "Name" in "Name & Telephone".
-	var addressTable = document.getElementsByClassName("addresses")[0];
-	var thead = addressTable.getElementsByTagName('thead')[0];
-	var ths = thead.getElementsByTagName('th');
-	for (var i = 0; i < ths.length; ++i) {
-		//console.log(ths[i].innerText);
-		if (ths[i].innerText === "NAME & TELEPHONE" || ths[i].innerText === "Name & Telephone") {
-			ths[i].innerText = "TELEPHONE";
-			break;
-		}
-	}
-	
-	// Do not display names.
-	var addressTable = document.getElementsByClassName("addresses")[0];
-	var tbody = addressTable.getElementsByTagName('tbody')[0];
-	var trs = tbody.getElementsByTagName('tr');
-	for (var i = 0; i < trs.length; ++i) {
-	  if (trs[i].children.length >= 4) {
-		var td = trs[i].children[3];
-		if (td.children.length >= 2 && td.children[0].tagName === 'STRONG') {
-			td.removeChild(td.children[0]);
-		}
-		var lang = trs[i].children[2];
-		if (lang.innerHTML.indexOf("Chinese") !== -1) {
-			var newLang = lang.innerHTML.split(" ")[1];
-			lang.innerHTML = '<strong>' + newLang + '</strong>';
-		}
-	  }
 	}
 })();

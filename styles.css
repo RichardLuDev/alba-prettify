@@ -9,3 +9,11 @@ div > img.map {
 	height: auto;
 	width: 100%;
 }
+
+div.assignment-box {
+    border: 1px solid black;
+    /* float: right; */
+    width: 200px;
+    padding: 10px;
+    margin-bottom: 10px;
+}

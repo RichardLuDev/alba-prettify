@@ -155,6 +155,12 @@
 	title2.children[1].innerText += ' Map';
 	bigMap.parentNode.parentNode.insertBefore(title2, bigMap.parentNode);
 	
+	// Add assignment box with Name and stuff.
+	var assignmentBox = document.createElement('DIV');
+	assignmentBox.innerHTML = 'Name:<br><br>Return By:<br>';
+	assignmentBox.className = 'assignment-box';
+	bigMap.parentNode.parentNode.insertBefore(assignmentBox, bigMap.parentNode);
+	
 	// Add new legend
 	var smallMap = document.getElementsByClassName("overview")[0];
 	var firstLegend = smallMap.nextSibling;

@@ -2,12 +2,12 @@ div.card > div.right-corner {
 	float: none;
 	margin-left: 0;
 	margin-bottom: 0;
-	page-break-after: always;
 }
 
 div > img.map {
 	height: auto;
 	width: 100%;
+	page-break-after: always;
 }
 
 div.assignment-box {

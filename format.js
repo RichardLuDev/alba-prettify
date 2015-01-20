@@ -1,4 +1,22 @@
 ﻿(function() {
+	/* Grab all elements that are to be manipulated later. */
+	var bigMap = document.getElementsByClassName("map")[0];
+	var bigMapSrc = bigMap.getAttribute('SRC');
+	var bigMapParent = bigMap.parentElement;
+	var bigMapParentParent = bigMapParent.parentElement;
+	var smallMap = document.getElementsByClassName("overview")[0];
+	var smallMapParent = smallMap.parentElement;
+	var smallMapParentParent = smallMapParent.parentElement;
+	var firstLegend = smallMapParent.nextSibling;
+	var brElement = smallMapParent.previousSibling;
+	var brElementParent = brElement.parentElement;
+	var mobileCode = document.getElementsByClassName('directions')[0];
+	var mobileCodeParent = mobileCode.parentElement;
+	var actualTitle = smallMapParent.previousSibling;  // Accomodate optional territory "Notes".
+	while (actualTitle.tagName != 'H1') {
+		actualTitle = actualTitle.previousSibling;
+	}
+
 	var all_url = window.location.href + '&nv';
 	var table = document.createElement('div');
 	$(table).load(all_url + ' .addresses', function() {
@@ -49,10 +67,13 @@
 			}
 		}
 	});
+	// TODO: Remove jQuery dependency.
 	$('.card').append(table);
 	
-	var bigMap = document.getElementsByClassName("map")[0];
-	var src = bigMap.getAttribute('SRC').split('?');
+	// Remove mobile QR code
+	mobileCodeParent.removeChild(mobileCode);
+	
+	var src = bigMapSrc.split('?');
 	src.shift();
 	src = src.join('?');
 	src = src.split('&');
@@ -117,53 +138,33 @@
 	}
 	
 	// Make separate density map.
-	var bigMap = document.getElementsByClassName("map")[0];
 	var newMap = bigMap.cloneNode(true);
-	var mapSrc = newMap.getAttribute('SRC');
-	mapSrc = mapSrc.replace('&path=', '&path=').replace(/markers=[^&]+&?/g, '').replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
+	var mapSrc = bigMapSrc.replace('&path=', '&path=').replace(/markers=[^&]+&?/g, '').replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
 	var markerString = '&markers=size:tiny|color:black';
 	for (var i=1;i<markers.length;i++) {
 		markerString += '|' + markers[i].x.toString() + ',' + markers[i].y.toString();
 	}
 	mapSrc += markerString;
 	newMap.setAttribute('SRC', mapSrc);
-	bigMap.parentNode.insertBefore(newMap, bigMap.nextSibling);
+	bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
 	
 	// Fix map.
-	var bigMap = document.getElementsByClassName("map")[0];
-	var mapSrc = bigMap.getAttribute('SRC');
 	// Easier to see small black than small white.
-	mapSrc = mapSrc.replace('color:white', 'color:black');
-	// Zoom 15 is where you can see a lot more.
-	//mapSrc = mapSrc.replace('&path=', '&path=').replace('color:white', 'color:black') + '&zoom=15';
+	var mapSrc = bigMapSrc.replace('color:white', 'color:black');
 	bigMap.setAttribute('SRC', mapSrc);
 
-	// Reorder smaller map so it doesn't take up extra space.
-	/*var smallMap = document.getElementsByClassName("overview")[0];
-	var pSubtitle = smallMap.previousSibling.previousSibling;
-	smallMap.parentNode.insertBefore(smallMap, pSubtitle);*/
-	
 	// Duplicate territory name.
-	var smallMap = document.getElementsByClassName("overview")[0];
-	var title = smallMap.previousSibling;
-	while (title.tagName != 'H1') {
-		// Accomodate optional territory "Notes".
-		title = title.previousSibling;
-	}
-	var bigMap = document.getElementsByClassName("map")[0];
-	var title2 = title.cloneNode(true);
+	var title2 = actualTitle.cloneNode(true);
 	title2.children[1].innerText += ' Map';
-	bigMap.parentNode.parentNode.insertBefore(title2, bigMap.parentNode);
+	bigMapParentParent.insertBefore(title2, bigMapParent);
 	
 	// Add assignment box with Name and stuff.
 	var assignmentBox = document.createElement('DIV');
 	assignmentBox.innerHTML = 'Name:<br><br>Return By:<br>';
 	assignmentBox.className = 'assignment-box';
-	bigMap.parentNode.parentNode.insertBefore(assignmentBox, bigMap.parentNode);
+	bigMapParentParent.insertBefore(assignmentBox, bigMapParent);
 	
 	// Add new legend
-	var smallMap = document.getElementsByClassName("overview")[0];
-	var firstLegend = smallMap.nextSibling;
 	var nn = firstLegend.cloneNode(true);
 	nn.children[0].innerText = 'NN';
 	nn.children[1].innerText = 'New Number';
@@ -180,19 +181,17 @@
 	dnc.children[0].innerText = 'DNC';
 	dnc.children[1].innerText = 'Do Not Call';
 	dnc.childNodes[1].textContent = ' 住户请我们不要再来 ';
-	var br = smallMap.previousSibling;
-	br.parentNode.insertBefore(nn, br);
-	br.parentNode.insertBefore(nc, br);
-	br.parentNode.insertBefore(ncs, br);
-	br.parentNode.insertBefore(dnc, br);
+	
+	brElementParent.insertBefore(nn, brElement);
+	brElementParent.insertBefore(nc, brElement);
+	brElementParent.insertBefore(ncs, brElement);
+	brElementParent.insertBefore(dnc, brElement);
 	
 	// Remove old legend and small map
-	var smallMap = document.getElementsByClassName("overview")[0];
-	var container = smallMap.parentNode;
-	var next = smallMap.previousSibling;
+	var next = smallMapParent.previousSibling;
 	while (next && next.tagName !== 'TABLE') {
 		var toRemove = next;
 		next = next.nextSibling;
-		container.removeChild(toRemove);
+		smallMapParentParent.removeChild(toRemove);
 	}
 })();

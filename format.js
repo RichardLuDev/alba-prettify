@@ -46,8 +46,19 @@
 			for (var i = trs.length - 1; i >= 0; --i) {
 			  if (trs[i].children.length >= 4) {
 				var td = trs[i].children[3];
+				var td2 = trs[i].children[4];
 				if (td.children.length >= 2 && td.children[0].tagName === 'STRONG') {
 					td.removeChild(td.children[0]);
+				}
+				if (td2.children.length >= 1) {
+					if (td2.children[0].tagName === 'SPAN') {
+						td2.removeChild(td2.children[0]);
+					} else if (td2.children[0].tagName === 'STRIKE') {
+						var child = td2.children[0];
+						if (child.children.length >= 1 && child.children[0].tagName === 'SPAN') {
+							child.removeChild(child.children[0]);
+						}
+					}
 				}
 				if (idx === 1) {
 					var td = trs[i].children[0];

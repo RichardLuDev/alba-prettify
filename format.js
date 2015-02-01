@@ -1,10 +1,10 @@
 ﻿(function() {
 	/* Grab all elements that are to be manipulated later. */
-	var bigMap = document.getElementsByClassName("map")[0];
+	var bigMap = document.getElementsByClassName('map')[0];
 	var bigMapSrc = bigMap.getAttribute('SRC');
 	var bigMapParent = bigMap.parentElement;
 	var bigMapParentParent = bigMapParent.parentElement;
-	var smallMap = document.getElementsByClassName("overview")[0];
+	var smallMap = document.getElementsByClassName('overview')[0];
 	var smallMapParent = smallMap.parentElement;
 	var smallMapParentParent = smallMapParent.parentElement;
 	var firstLegend = smallMapParent.nextSibling;
@@ -12,10 +12,12 @@
 	var brElementParent = brElement.parentElement;
 	var mobileCode = document.getElementsByClassName('directions')[0];
 	var mobileCodeParent = mobileCode.parentElement;
-	var actualTitle = smallMapParent.previousSibling;  // Accomodate optional territory "Notes".
+	var actualTitle = smallMapParent.previousSibling;  // Accomodate optional territory 'Notes'.
 	while (actualTitle.tagName != 'H1') {
 		actualTitle = actualTitle.previousSibling;
 	}
+	var possibleNote = actualTitle.nextSibling;
+	var overallCard = document.getElementsByClassName('card')[0];
 
 	var all_url = window.location.href + '&nv';
 	var table = document.createElement('div');
@@ -24,18 +26,18 @@
 		subheading.innerText = 'Non-Chinese Calls';
 		table.insertBefore(subheading, table.firstChild);
 	
-		var addressTables = document.getElementsByClassName("addresses");
+		var addressTables = document.getElementsByClassName('addresses');
 		
 		for (var idx = addressTables.length - 1; idx >= 0; idx--) {
 			var addressTable = addressTables[idx];
 			
-			// Remove "Name" in "Name & Telephone".
+			// Remove 'Name' in 'Name & Telephone'.
 			var thead = addressTable.getElementsByTagName('thead')[0];
 			var ths = thead.getElementsByTagName('th');
 			for (var i = 0; i < ths.length; ++i) {
 				//console.log(ths[i].innerText);
-				if (ths[i].innerText === "NAME & TELEPHONE" || ths[i].innerText === "Name & Telephone") {
-					ths[i].innerText = "TELEPHONE";
+				if (ths[i].innerText === 'NAME & TELEPHONE' || ths[i].innerText === 'Name & Telephone') {
+					ths[i].innerText = 'TELEPHONE';
 					break;
 				}
 			}
@@ -66,9 +68,9 @@
 					trs[i].removeChild(trs[i].children[6]);
 				}
 				var lang = trs[i].children[2];
-				if (lang.innerHTML.indexOf("Chinese") !== -1) {
+				if (lang.innerHTML.indexOf('Chinese') !== -1) {
 					if (idx === 0) {
-						var newLang = lang.innerHTML.split(" ")[1];
+						var newLang = lang.innerHTML.split(' ')[1];
 						lang.innerHTML = '<strong>' + newLang + '</strong>';
 					} else {
 						tbody.removeChild(trs[i]);
@@ -84,12 +86,19 @@
 	// Remove mobile QR code
 	mobileCodeParent.removeChild(mobileCode);
 	
+	// Remove territory notes
+	if (possibleNote.children.length === 1 &&
+			possibleNote.children[0].tagName === 'STRONG' &&
+			possibleNote.children[0].innerText === 'Notes:') {
+		overallCard.removeChild(possibleNote);
+	}
+	
 	var src = bigMapSrc.split('?');
 	src.shift();
 	src = src.join('?');
 	src = src.split('&');
 	var parseQueryString = function(a) {
-		if (a == "") return {};
+		if (a == '') return {};
 		var b = {};
 		for (var i = 0; i < a.length; ++i)
 		{
@@ -98,7 +107,7 @@
 			}
 			var p=a[i].split('=');
 			if (p.length != 2) continue;
-			var name=p[0], value=decodeURIComponent(p[1].replace(/\+/g, " "));
+			var name=p[0], value=decodeURIComponent(p[1].replace(/\+/g, ' '));
 			if (b[name]) {
 				if (b[name] instanceof Array) {
 					b[name].push(value);

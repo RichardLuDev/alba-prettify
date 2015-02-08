@@ -1,4 +1,4 @@
-﻿(function() {
+(function() {
 	/* Grab all elements that are to be manipulated later. */
 	var bigMap = document.getElementsByClassName('map')[0];
 	var bigMapSrc = bigMap.getAttribute('SRC');
@@ -80,7 +80,6 @@
 			}
 		}
 	});
-	// TODO: Remove jQuery dependency.
 	$('.card').append(table);
 	
 	// Remove mobile QR code
@@ -93,6 +92,11 @@
 		overallCard.removeChild(possibleNote);
 	}
 	
+	// Easier to see small black than small white.
+	var mapSrc = bigMapSrc.replace('color:white', 'color:black');
+	bigMap.setAttribute('SRC', mapSrc);
+	
+	// Parse all markers.
 	var src = bigMapSrc.split('?');
 	src.shift();
 	src = src.join('?');
@@ -139,6 +143,7 @@
 	for (var i=1;i<markers.length;i++) {
 		var vals = markers[i].split('|');
 		var obj = {};
+		obj.original = markers[i];
 		for (var j=0;j<vals.length;j++) {
 			if (vals[j].indexOf(',') !== -1) {
 				var v = vals[j].split(',');
@@ -159,19 +164,12 @@
 	
 	// Make separate density map.
 	var newMap = bigMap.cloneNode(true);
-	var mapSrc = bigMapSrc.replace('&path=', '&path=').replace(/markers=[^&]+&?/g, '').replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
-	var markerString = '&markers=size:tiny|color:black';
-	for (var i=1;i<markers.length;i++) {
-		markerString += '|' + markers[i].x.toString() + ',' + markers[i].y.toString();
-	}
-	mapSrc += markerString;
+
+	// We want bigger markers, even on the second map!
+	var mapSrc = bigMapSrc.replace('&path=', '&path=').replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
+
 	newMap.setAttribute('SRC', mapSrc);
 	bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
-	
-	// Fix map.
-	// Easier to see small black than small white.
-	var mapSrc = bigMapSrc.replace('color:white', 'color:black');
-	bigMap.setAttribute('SRC', mapSrc);
 
 	// Duplicate territory name.
 	var title2 = actualTitle.cloneNode(true);

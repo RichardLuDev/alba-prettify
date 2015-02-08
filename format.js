@@ -23,11 +23,14 @@
 	var table = document.createElement('div');
 	$(table).load(all_url + ' .addresses', function() {
 		var subheading = document.createElement('h2');
-		subheading.innerText = 'Non-Chinese Calls';
+		subheading.innerText = 'Not Valid Calls';
 		table.insertBefore(subheading, table.firstChild);
-	
+
 		var addressTables = document.getElementsByClassName('addresses');
 		
+		var VALID_TABLE = 0;
+		var INVALID_TABLE = 1;
+		var NOT_VALID_STATUS = 'Not valid';
 		for (var idx = addressTables.length - 1; idx >= 0; idx--) {
 			var addressTable = addressTables[idx];
 			
@@ -46,37 +49,51 @@
 			var tbody = addressTable.getElementsByTagName('tbody')[0];
 			var trs = tbody.getElementsByTagName('tr');
 			for (var i = trs.length - 1; i >= 0; --i) {
-			  if (trs[i].children.length >= 4) {
-				var td = trs[i].children[3];
-				var td2 = trs[i].children[4];
-				if (td.children.length >= 2 && td.children[0].tagName === 'STRONG') {
-					td.removeChild(td.children[0]);
+			  	if (trs[i].children.length < 5) {
+			  		continue;
+			  	}
+				var idField = trs[i].children[0];
+			  	var status = trs[i].children[1];
+				var language = trs[i].children[2];
+				var nameAndTelephone = trs[i].children[3];
+				var address = trs[i].children[4];
+
+				// Filter rows based on table
+				if ((idx === INVALID_TABLE && status.innerText !== NOT_VALID_STATUS) ||
+						(idx === VALID_TABLE && status.innerText === NOT_VALID_STATUS)) {
+					tbody.removeChild(trs[i]);
+					continue;
 				}
-				if (td2.children.length >= 1) {
-					if (td2.children[0].tagName === 'SPAN') {
-						td2.removeChild(td2.children[0]);
-					} else if (td2.children[0].tagName === 'STRIKE') {
-						var child = td2.children[0];
+
+				// Remove the boxes and the letter labels for invalid calls.
+				if (idx === INVALID_TABLE) {
+					trs[i].removeChild(trs[i].children[6]);
+					idField.removeChild(idField.children[0]);
+				}
+				
+				// Chinese is redundant
+				if (language.innerText.indexOf('Chinese') !== -1) {
+					var contracted = language.innerText.split(' ')[1];
+					language.innerHTML = '<strong>' + contracted + '</strong>';
+				}
+
+				// Remove name
+				if (nameAndTelephone.children.length >= 2 &&
+						nameAndTelephone.children[0].tagName === 'STRONG') {
+					nameAndTelephone.removeChild(nameAndTelephone.children[0]);
+				}
+
+				// Remove geocode
+				if (address.children.length >= 1) {
+					if (address.children[0].tagName === 'SPAN') {
+						address.removeChild(address.children[0]);
+					} else if (address.children[0].tagName === 'STRIKE') {
+						var child = address.children[0];
 						if (child.children.length >= 1 && child.children[0].tagName === 'SPAN') {
 							child.removeChild(child.children[0]);
 						}
 					}
 				}
-				if (idx === 1) {
-					var td = trs[i].children[0];
-					td.removeChild(td.children[0]);
-					trs[i].removeChild(trs[i].children[6]);
-				}
-				var lang = trs[i].children[2];
-				if (lang.innerHTML.indexOf('Chinese') !== -1) {
-					if (idx === 0) {
-						var newLang = lang.innerHTML.split(' ')[1];
-						lang.innerHTML = '<strong>' + newLang + '</strong>';
-					} else {
-						tbody.removeChild(trs[i]);
-					}
-				}
-			  }
 			}
 		}
 	});

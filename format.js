@@ -183,7 +183,8 @@
 	var newMap = bigMap.cloneNode(true);
 
 	// We want bigger markers, even on the second map!
-	var mapSrc = bigMapSrc.replace('&path=', '&path=').replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
+	var mapSrc = bigMapSrc.replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
+	mapSrc = mapSrc.replace('color:white', 'color:black');
 
 	newMap.setAttribute('SRC', mapSrc);
 	bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);

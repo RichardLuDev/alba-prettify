@@ -12,14 +12,14 @@
 	var brElementParent = brElement.parentElement;
 	var mobileCode = document.getElementsByClassName('directions')[0];
 	var mobileCodeParent = mobileCode.parentElement;
+	var overallCard = document.getElementsByClassName('card')[0];
+	var all_url = window.location.href + '&nv';
 	var actualTitle = smallMapParent.previousSibling;  // Accomodate optional territory 'Notes'.
 	while (actualTitle.tagName != 'H1') {
 		actualTitle = actualTitle.previousSibling;
 	}
 	var possibleNote = actualTitle.nextSibling;
-	var overallCard = document.getElementsByClassName('card')[0];
-
-	var all_url = window.location.href + '&nv';
+	
 	var table = document.createElement('div');
 	$(table).load(all_url + ' .addresses', function() {
 		var subheading = document.createElement('h2');
@@ -64,6 +64,11 @@
 					tbody.removeChild(trs[i]);
 					continue;
 				}
+				
+				// Remove extra ID.
+				if (idField.children.length > 1) {
+					idField.removeChild(idField.children[1]);
+				}
 
 				// Remove the boxes and the letter labels for invalid calls.
 				if (idx === INVALID_TABLE) {
@@ -71,11 +76,13 @@
 					idField.removeChild(idField.children[0]);
 				}
 				
-				// Chinese is redundant
-				if (language.innerText.indexOf('Chinese') !== -1) {
-					var contracted = language.innerText.split(' ')[1];
-					language.innerHTML = '<strong>' + contracted + '</strong>';
+				// Bold language column.
+				var languageText = language.innerText;
+				if (languageText.indexOf('Chinese') !== -1) {
+					// Chinese is redundant for Mandarin and Cantonese.
+					languageText = languageText.split(' ')[1];
 				}
+				language.innerHTML = '<strong>' + languageText + '</strong>';
 
 				// Remove name
 				if (nameAndTelephone.children.length >= 2 &&
@@ -97,9 +104,12 @@
 			}
 		}
 	});
-	$('.card').append(table);
+	overallCard.appendChild(table);
 	
 	// Remove mobile QR code
+	if (mobileCode.children.length > 0) {
+		mobileCode.children[0].setAttribute('SRC', '');
+	}
 	mobileCodeParent.removeChild(mobileCode);
 	
 	// Remove territory notes
@@ -108,10 +118,6 @@
 			possibleNote.children[0].innerText === 'Notes:') {
 		overallCard.removeChild(possibleNote);
 	}
-	
-	// Easier to see small black than small white.
-	var mapSrc = bigMapSrc.replace('color:white', 'color:black');
-	bigMap.setAttribute('SRC', mapSrc);
 	
 	// Parse all markers.
 	var src = bigMapSrc.split('?');
@@ -156,7 +162,7 @@
 		}
 		markers[0] = initial;
 	}
-	var avgX = 0, avgY = 0;
+	var avgX = 0, avgY = 0, minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 	for (var i=1;i<markers.length;i++) {
 		var vals = markers[i].split('|');
 		var obj = {};
@@ -166,6 +172,10 @@
 				var v = vals[j].split(',');
 				obj.x = parseFloat(v[0]);
 				obj.y = parseFloat(v[1]);
+				minX = Math.min(minX, obj.x);
+				minY = Math.min(minY, obj.y);
+				maxX = Math.max(maxX, obj.x);
+				maxY = Math.max(maxY, obj.y);
 				avgX += obj.x;
 				avgY += obj.y;
 			} else {
@@ -178,13 +188,21 @@
 		avgX /= markers.length - 1;
 		avgY /= markers.length - 1;
 	}
+	var midX = (maxX + minX) / 2;
+	var midY = (maxY + minY) / 2;
 	
-	// Make separate density map.
+	// Easier to see small black than small white.
+	var mapSrc = bigMapSrc.replace('color:white', 'color:black');
+	mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
+	mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
+	if (window.APKEY !== undefined) {
+		mapSrc += '&key=' + window.APKEY;
+	}
+	bigMap.setAttribute('SRC', mapSrc);
+	
+	// Make separate density map but with modified src.
 	var newMap = bigMap.cloneNode(true);
-
-	// We want bigger markers, even on the second map!
-	var mapSrc = bigMapSrc.replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
-	mapSrc = mapSrc.replace('color:white', 'color:black');
+	mapSrc = mapSrc.replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
 
 	newMap.setAttribute('SRC', mapSrc);
 	bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
@@ -222,6 +240,9 @@
 	brElementParent.insertBefore(nc, brElement);
 	brElementParent.insertBefore(ncs, brElement);
 	brElementParent.insertBefore(dnc, brElement);
+	
+	// Cancel small map loading.
+	smallMap.setAttribute('SRC', '');
 	
 	// Remove old legend and small map
 	var next = smallMapParent.previousSibling;

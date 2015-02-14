@@ -1,0 +1,49 @@
+@page {
+	margin: 0.25in 0.5in 0.25in 0.5in;
+}
+
+@media screen {
+	div > img.map {
+		padding-bottom: 0.5in;
+		border-bottom: 4pt solid #ddd;
+	}
+
+	div.card {
+		margin: 0.25in 0.5in 0.25in 0.5in;
+		max-width: 8in;
+	}
+}
+
+@media print {
+	div > img.map {
+		padding-bottom: 0;
+		border-bottom: none;
+	}
+}
+
+div.card > h1 {
+	margin: 10pt 0 8pt 0;
+}
+
+div.card > div.right-corner {
+	float: none;
+	margin-left: 0;
+	margin-bottom: 0;
+}
+
+div > img.map {
+	height: auto;
+	width: 100%;
+	page-break-after: always;
+}
+
+div.assignment-box {
+    border: 1px solid black;
+    width: 200px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+table.addresses {
+	margin-top: 4pt;
+}

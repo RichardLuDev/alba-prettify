@@ -18,7 +18,7 @@
 	while (actualTitle.tagName != 'H1') {
 		actualTitle = actualTitle.previousSibling;
 	}
-	var possibleNote = actualTitle.nextSibling;
+	var noteOrInfo = actualTitle.nextSibling;
 	
 	var table = document.createElement('div');
 	$(table).load(all_url + ' .addresses', function() {
@@ -113,10 +113,12 @@
 	mobileCodeParent.removeChild(mobileCode);
 	
 	// Remove territory notes
-	if (possibleNote.children.length === 1 &&
-			possibleNote.children[0].tagName === 'STRONG' &&
-			possibleNote.children[0].innerText === 'Notes:') {
-		overallCard.removeChild(possibleNote);
+	if (noteOrInfo.children.length === 1 &&
+			noteOrInfo.children[0].tagName === 'STRONG' &&
+			noteOrInfo.children[0].innerText === 'Notes:') {
+		var info = noteOrInfo.nextSibling;
+		overallCard.removeChild(noteOrInfo);
+		noteOrInfo = info;
 	}
 	
 	// Parse all markers.
@@ -207,10 +209,16 @@
 	newMap.setAttribute('SRC', mapSrc);
 	bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
 
-	// Duplicate territory name.
+	// Move stats to second page.
 	var title2 = actualTitle.cloneNode(true);
-	title2.children[1].innerText += ' Map';
-	bigMapParentParent.insertBefore(title2, bigMapParent);
+	title2.children[1].innerText += ' Zoomed-In Map';
+	newMap.parentElement.insertBefore(title2, newMap);
+	newMap.parentElement.insertBefore(noteOrInfo, newMap);
+	
+	// Duplicate territory name.
+	var title3 = actualTitle.cloneNode(true);
+	title3.children[1].innerText += ' Map';
+	bigMapParentParent.insertBefore(title3, bigMapParent);
 	
 	// Add assignment box with Name and stuff.
 	var assignmentBox = document.createElement('DIV');

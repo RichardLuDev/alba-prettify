@@ -1,4 +1,30 @@
-(function() {
+var recordEvent = function(category, action, label, value) {
+	chrome.runtime.sendMessage({
+		'type': 'analytics',
+		'object': {
+			'hitType': 'event',
+			'category': category,
+			'action': action,
+			'label': label,
+			'value': value,
+		},
+	});
+};
+
+var recordPageView = function() {
+	chrome.runtime.sendMessage({
+		'type': 'analytics',
+		'object': {
+			'hitType': 'pageview',
+			'page': location.pathname + location.search + location.hash,
+			'title': document.title,
+		},
+	});
+};
+
+var main = function() {
+	recordPageView();
+
 	/* Grab all elements that are to be manipulated later. */
 	var bigMap = document.getElementsByClassName('map')[0];
 	var bigMapSrc = bigMap.getAttribute('SRC');
@@ -259,4 +285,6 @@
 		next = next.nextSibling;
 		smallMapParentParent.removeChild(toRemove);
 	}
-})();
+};
+
+main();

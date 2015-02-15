@@ -47,3 +47,7 @@ div.assignment-box {
 table.addresses {
 	margin-top: 4pt;
 }
+
+table.addresses.invalid td:nth-child(3) {
+	border-right: 2px solid #ddd;
+}

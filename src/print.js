@@ -40,12 +40,12 @@ var main = function() {
 	var mobileCodeParent = mobileCode.parentElement;
 	var overallCard = document.getElementsByClassName('card')[0];
 	var all_url = window.location.href + '&nv';
-	var actualTitle = smallMapParent.previousSibling;  // Accomodate optional territory 'Notes'.
+	var actualTitle = smallMapParent.previousSibling;  // Accommodate optional territory 'Notes'.
 	while (actualTitle.tagName != 'H1') {
 		actualTitle = actualTitle.previousSibling;
 	}
 	var noteOrInfo = actualTitle.nextSibling;
-	
+
 	var table = document.createElement('div');
 	$(table).load(all_url + ' .addresses', function() {
 		var subheading = document.createElement('h2');
@@ -53,53 +53,77 @@ var main = function() {
 		table.insertBefore(subheading, table.firstChild);
 
 		var addressTables = document.getElementsByClassName('addresses');
-		
+
 		var VALID_TABLE = 0;
 		var INVALID_TABLE = 1;
 		var NOT_VALID_STATUS = 'Not valid';
 		for (var idx = addressTables.length - 1; idx >= 0; idx--) {
 			var addressTable = addressTables[idx];
 			
-			// Remove 'Name' in 'Name & Telephone'.
 			var thead = addressTable.getElementsByTagName('thead')[0];
-			var ths = thead.getElementsByTagName('th');
-			for (var i = 0; i < ths.length; ++i) {
-				//console.log(ths[i].innerText);
-				if (ths[i].innerText === 'NAME & TELEPHONE' || ths[i].innerText === 'Name & Telephone') {
-					ths[i].innerText = 'TELEPHONE';
-					break;
+			var headingRow = thead.getElementsByTagName('tr')[0];
+			var headings = thead.getElementsByTagName('th');
+			if (idx === INVALID_TABLE) {
+				// Remove all but the status and address columns for invalids.
+				for (var i = headings.length - 1; i >= 0; --i) {
+					if (headings[i].innerText.toLowerCase() !== 'language' &&
+							headings[i].innerText.toLowerCase() !== 'address' &&
+							headings[i].innerText.toLowerCase() !== 'notes') {
+						headingRow.removeChild(headings[i]);
+					}
+				}
+				// Duplicate headings for second row.
+				var len = headings.length;
+				for (var i = 0; i < len; ++i) {
+					headingRow.appendChild(headings[i].cloneNode(true));
+				}
+				// Add CSS class to separate the tables
+				addressTable.classList.add('invalid');
+			} else {
+				// Remove 'Name' in 'Name & Telephone'.
+				for (var i = 0; i < headings.length; ++i) {
+					if (headings[i].innerText.toLowerCase() === 'name & telephone') {
+						headings[i].innerText = 'TELEPHONE';
+						break;
+					}
 				}
 			}
 			
-			// Do not display names.
 			var tbody = addressTable.getElementsByTagName('tbody')[0];
 			var trs = tbody.getElementsByTagName('tr');
 			for (var i = trs.length - 1; i >= 0; --i) {
-			  	if (trs[i].children.length < 5) {
-			  		continue;
-			  	}
 				var idField = trs[i].children[0];
 			  	var status = trs[i].children[1];
 				var language = trs[i].children[2];
 				var nameAndTelephone = trs[i].children[3];
 				var address = trs[i].children[4];
-
-				// Filter rows based on table
+				var notes = trs[i].children[5];
+				var checkboxes = trs[i].children[6];
+				
+				// Separate rows based on table.
 				if ((idx === INVALID_TABLE && status.innerText !== NOT_VALID_STATUS) ||
 						(idx === VALID_TABLE && status.innerText === NOT_VALID_STATUS)) {
 					tbody.removeChild(trs[i]);
 					continue;
 				}
-				
-				// Remove extra ID.
-				if (idField.children.length > 1) {
-					idField.removeChild(idField.children[1]);
-				}
 
-				// Remove the boxes and the letter labels for invalid calls.
+				// Remove content.
 				if (idx === INVALID_TABLE) {
-					trs[i].removeChild(trs[i].children[6]);
-					idField.removeChild(idField.children[0]);
+					// Only keep language, address, and notes for invalid calls.
+					trs[i].removeChild(idField);
+					trs[i].removeChild(status);
+					trs[i].removeChild(nameAndTelephone);
+					trs[i].removeChild(checkboxes);
+				} else {
+					// Remove extra identifier for valid calls.
+					if (idField.children.length > 1) {
+						idField.removeChild(idField.children[1]);
+					}
+					// Remove name.
+					if (nameAndTelephone.children.length >= 2 &&
+							nameAndTelephone.children[0].tagName === 'STRONG') {
+						nameAndTelephone.removeChild(nameAndTelephone.children[0]);
+					}
 				}
 				
 				// Bold language column.
@@ -110,13 +134,7 @@ var main = function() {
 				}
 				language.innerHTML = '<strong>' + languageText + '</strong>';
 
-				// Remove name
-				if (nameAndTelephone.children.length >= 2 &&
-						nameAndTelephone.children[0].tagName === 'STRONG') {
-					nameAndTelephone.removeChild(nameAndTelephone.children[0]);
-				}
-
-				// Remove geocode
+				// Remove geocode for both.
 				if (address.children.length >= 1) {
 					if (address.children[0].tagName === 'SPAN') {
 						address.removeChild(address.children[0]);
@@ -128,10 +146,30 @@ var main = function() {
 					}
 				}
 			}
+			
+			// Split invalid table into two.
+			if (idx === INVALID_TABLE) {
+				var mid = Math.ceil(trs.length / 2);
+				for (var i = 0; i < mid; ++i) {
+					var curRow = trs[i];
+					// Account for odd numbered tables.
+					if (mid >= trs.length) {
+						for (var j = curRow.children.length - 1; j >= 0; --j) {
+							curRow.appendChild(document.createElement('td'));
+						}
+						break;
+					}
+					var nextRow = trs[mid];
+					for (var j = 0; j < nextRow.children.length; ++j) {
+						curRow.appendChild(nextRow.children[j].cloneNode(true));
+					}
+					tbody.removeChild(nextRow);
+				}
+			}
 		}
 	});
 	overallCard.appendChild(table);
-	
+
 	// Remove mobile QR code
 	if (mobileCode.children.length > 0) {
 		mobileCode.children[0].setAttribute('SRC', '');

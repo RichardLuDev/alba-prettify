@@ -3,7 +3,7 @@
 
 	"name": "Alba Prettify",
 	"description": "This extension improves Alba's territory printing output.",
-	"version": "0.8.1",
+	"version": "0.8.2",
 
 	"icons": {
 		"16": "res/icon16.png",
@@ -19,6 +19,8 @@
 	
 	"background": {
 		"scripts": [
+			"lib/jquery-2.1.1.min.js",
+			"src/common.js",
 			"src/background.js"
 		]
 	},
@@ -34,7 +36,8 @@
 			],
 			"js": [
 				"lib/jquery-2.1.1.min.js",
-				"src/contentanalytics.js"
+				"src/common.js",
+				"src/contentanalytics.js",
 				"src/print.js"
 			],
 			"run_at": "document_end"
@@ -45,7 +48,7 @@
 			],
 			"js": [
 				"lib/jquery-2.1.1.min.js",
-				"src/shortcuts.js"
+				"src/common.js"
 			],
 			"run_at": "document_end"
 		}

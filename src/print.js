@@ -1,27 +1,3 @@
-var recordEvent = function(category, action, label, value) {
-	chrome.runtime.sendMessage({
-		'type': 'analytics',
-		'object': {
-			'hitType': 'event',
-			'category': category,
-			'action': action,
-			'label': label,
-			'value': value,
-		},
-	});
-};
-
-var recordPageView = function() {
-	chrome.runtime.sendMessage({
-		'type': 'analytics',
-		'object': {
-			'hitType': 'pageview',
-			'page': location.pathname + location.search + location.hash,
-			'title': document.title,
-		},
-	});
-};
-
 var main = function() {
 	recordPageView();
 
@@ -248,7 +224,7 @@ var main = function() {
 		}
 		markers[0] = initial;
 	}
-	var avgX = 0, avgY = 0, minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+	var avgX = 0, avgY = 0;
 	for (var i=1;i<markers.length;i++) {
 		var vals = markers[i].split('|');
 		var obj = {};
@@ -258,10 +234,6 @@ var main = function() {
 				var v = vals[j].split(',');
 				obj.x = parseFloat(v[0]);
 				obj.y = parseFloat(v[1]);
-				minX = Math.min(minX, obj.x);
-				minY = Math.min(minY, obj.y);
-				maxX = Math.max(maxX, obj.x);
-				maxY = Math.max(maxY, obj.y);
 				avgX += obj.x;
 				avgY += obj.y;
 			} else {
@@ -274,16 +246,12 @@ var main = function() {
 		avgX /= markers.length - 1;
 		avgY /= markers.length - 1;
 	}
-	var midX = (maxX + minX) / 2;
-	var midY = (maxY + minY) / 2;
 	
 	// Easier to see small black than small white.
 	var mapSrc = bigMapSrc.replace('color:white', 'color:black');
+	// Cleanup unused fields.
 	mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
 	mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
-	if (window.APKEY !== undefined) {
-		mapSrc += '&key=' + window.APKEY;
-	}
 	bigMap.setAttribute('SRC', mapSrc);
 	
 	// Make separate density map but with modified src.

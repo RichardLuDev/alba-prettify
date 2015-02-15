@@ -34,6 +34,7 @@
 			],
 			"js": [
 				"lib/jquery-2.1.1.min.js",
+				"src/contentanalytics.js"
 				"src/print.js"
 			],
 			"run_at": "document_end"

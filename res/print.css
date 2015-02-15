@@ -15,10 +15,6 @@
 }
 
 @media print {
-	div > img.map {
-		padding-bottom: 0;
-		border-bottom: none;
-	}
 }
 
 div.card > h1 {
@@ -50,4 +46,16 @@ table.addresses {
 
 table.addresses.invalid td:nth-child(3) {
 	border-right: 2px solid #ddd;
+}
+
+table.addresses tr td {
+	-webkit-print-color-adjust: exact;
+}
+
+table.addresses tr.light td {
+	background-color: #fff;
+}
+
+table.addresses tr.dark td {
+	background-color: #f9f9f9;
 }

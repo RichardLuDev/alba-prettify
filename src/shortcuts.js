@@ -19,13 +19,30 @@ var saveAll = function() {
 };
 var nextPage = function() {
 	DEBUG && console.log('next');
+	if ($('input.next').prop('disabled')) {
+		return false;
+	}
 	$('input.next').click();
+};
+var prevPage = function() {
+	DEBUG && console.log('prev');
+	if ($('input.prev').prop('disabled')) {
+		return false;
+	}
+	$('input.prev').click();
 };
 var rep = function(action, timeout, next) {
 	return function() {
-		action();
-		setTimeout(next, timeout);
+		if (action() !== false) {
+			setTimeout(next, timeout);
+		}
 	};
+};
+var stopAll = function() {
+	var id = window.setTimeout(function() {}, 0);
+	while (id--) {
+		window.clearTimeout(id); // will do nothing if no timeout with id is present
+	}
 };
 var auto = function() {
 	rep(expandAll, 1000,
@@ -34,4 +51,3 @@ var auto = function() {
 	rep(nextPage, 1000,
 		auto))))();
 };
-auto();

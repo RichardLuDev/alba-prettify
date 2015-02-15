@@ -165,6 +165,26 @@ var main = function() {
 					}
 					tbody.removeChild(nextRow);
 				}
+			// Color changes when street changes
+			} else {
+				// /[,?#\d]* / - Matches the first bits of the street number, enforcing ending in space.
+				// /[\d]*[a-zA-Z]+(?!\d)/ - Street names can start with numbers, 1st, etc, but must not contain
+				//                          any letters followed by numbers, as those are postal codes.
+				// ((?:[\d]*[a-zA-Z]+(?!\d) ?)*) - Capture the full street name, possibly repeats with 'St W'.
+				var STREET_ADDRESS = /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/;
+				var CSS_CLASSES = ['light', 'dark'];
+				var css_index = 1;
+				for (var i = 0; i < trs.length - 1; ++i) {
+					trs[i].classList.add(CSS_CLASSES[css_index]);
+					var curStreet = STREET_ADDRESS.exec(trs[i].children[4].innerText);
+					var nextStreet = STREET_ADDRESS.exec(trs[i + 1].children[4].innerText);
+					if (curStreet[1] !== nextStreet[1]) {
+						css_index = 1 - css_index;
+					}
+				}
+				if (trs.length) {
+					trs[trs.length - 1].classList.add(CSS_CLASSES[css_index]);
+				}
 			}
 		}
 	});

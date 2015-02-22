@@ -188,9 +188,13 @@ var main = function(options) {
 				}
 			}
 		}
+		
+		if (table.getElementsByTagName('tr').length <= 1) {
+			overallCard.removeChild(table);
+		}
 	});
 	overallCard.appendChild(table);
-
+	
 	// Remove mobile QR code
 	if (mobileCode.children.length > 0) {
 		mobileCode.children[0].setAttribute('SRC', '');
@@ -311,29 +315,31 @@ var main = function(options) {
 	assignmentBox.className = 'assignment-box';
 	bigMapParentParent.insertBefore(assignmentBox, bigMapParent);
 	
-	// Add new legend
-	var nn = firstLegend.cloneNode(true);
-	nn.children[0].innerText = 'NN';
-	nn.children[1].innerText = 'New Number';
-	nn.childNodes[1].textContent = ' 新地址 ';
-	var nc = nn.cloneNode(true);
-	nc.children[0].innerText = 'NC';
-	nc.children[1].innerText = 'Not Chinese (does not look Chinese)';
-	nc.childNodes[1].textContent = ' 不是中国人 ';
-	var ncs = nn.cloneNode(true);
-	ncs.children[0].innerText = 'NCS';
-	ncs.children[1].innerText =
-			'Not Chinese Speaking (looks Chinese but doesn\'t speak it)';
-	ncs.childNodes[1].textContent = ' 看似中国人但不说中文 ';
-	var dnc = nn.cloneNode(true);
-	dnc.children[0].innerText = 'DNC';
-	dnc.children[1].innerText = 'Do Not Call';
-	dnc.childNodes[1].textContent = ' 住户请我们不要再来 ';
-	
-	brElementParent.insertBefore(nn, brElement);
-	brElementParent.insertBefore(nc, brElement);
-	brElementParent.insertBefore(ncs, brElement);
-	brElementParent.insertBefore(dnc, brElement);
+	// Add better Chinese legend
+	if (actualTitle.innerText.indexOf('Chinese') !== -1) {
+		var nn = firstLegend.cloneNode(true);
+		nn.children[0].innerText = 'NN';
+		nn.children[1].innerText = 'New Number';
+		nn.childNodes[1].textContent = ' 新地址 ';
+		var nc = nn.cloneNode(true);
+		nc.children[0].innerText = 'NC';
+		nc.children[1].innerText = 'Not Chinese (does not look Chinese)';
+		nc.childNodes[1].textContent = ' 不是中国人 ';
+		var ncs = nn.cloneNode(true);
+		ncs.children[0].innerText = 'NCS';
+		ncs.children[1].innerText =
+				'Not Chinese Speaking (looks Chinese but doesn\'t speak it)';
+		ncs.childNodes[1].textContent = ' 看似中国人但不说中文 ';
+		var dnc = nn.cloneNode(true);
+		dnc.children[0].innerText = 'DNC';
+		dnc.children[1].innerText = 'Do Not Call';
+		dnc.childNodes[1].textContent = ' 住户请我们不要再来 ';
+		
+		brElementParent.insertBefore(nn, brElement);
+		brElementParent.insertBefore(nc, brElement);
+		brElementParent.insertBefore(ncs, brElement);
+		brElementParent.insertBefore(dnc, brElement);
+	}
 	
 	// Cancel small map loading.
 	smallMap.setAttribute('SRC', '');

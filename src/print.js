@@ -1,5 +1,5 @@
 var main = function() {
-	recordPageView();
+	Analytics.recordPageView();
 
 	/* Grab all elements that are to be manipulated later. */
 	var bigMap = document.getElementsByClassName('map')[0];

@@ -1,4 +1,15 @@
-var main = function() {
+chrome.storage.onChanged.addListener(function(changes, areaName) {
+	if (areaName === 'sync') {
+		for (var property in changes) {
+			if (property in Options) {
+				location.reload();
+				return;
+			}
+		}
+	}
+});
+
+var main = function(options) {
 	Analytics.recordPageView();
 
 	/* Grab all elements that are to be manipulated later. */
@@ -57,12 +68,14 @@ var main = function() {
 				// Add CSS class to separate the tables
 				addressTable.classList.add('invalid');
 			} else {
-				// Remove 'Name' in 'Name & Telephone'.
-				for (var i = 0; i < headings.length; ++i) {
-					if (headings[i].innerText.toLowerCase() ===
-							'name & telephone') {
-						headings[i].innerText = 'TELEPHONE';
-						break;
+				if (options[STORAGE_REMOVE_NAMES]) {
+					// Remove 'Name' in 'Name & Telephone'.
+					for (var i = 0; i < headings.length; ++i) {
+						if (headings[i].innerText.toLowerCase() ===
+								'name & telephone') {
+							headings[i].innerText = 'TELEPHONE';
+							break;
+						}
 					}
 				}
 			}
@@ -98,11 +111,14 @@ var main = function() {
 					if (idField.children.length > 1) {
 						idField.removeChild(idField.children[1]);
 					}
-					// Remove name.
-					if (nameAndTelephone.children.length >= 2 &&
-							nameAndTelephone.children[0].tagName === 'STRONG') {
-						nameAndTelephone.removeChild(
-								nameAndTelephone.children[0]);
+					
+					if (options[STORAGE_REMOVE_NAMES]) {
+						// Remove name.
+						if (nameAndTelephone.children.length >= 2 &&
+								nameAndTelephone.children[0].tagName === 'STRONG') {
+							nameAndTelephone.removeChild(
+									nameAndTelephone.children[0]);
+						}
 					}
 				}
 				
@@ -261,23 +277,28 @@ var main = function() {
 	// Cleanup unused fields.
 	mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
 	mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
+	if (options[STORAGE_REMOVE_MARKERS]) {
+		mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
+	}
 	bigMap.setAttribute('SRC', mapSrc);
 	
-	// Make separate density map but with modified src.
-	var newMap = bigMap.cloneNode(true);
-	var avgLoc = avgX.toString() + ',' + avgY.toString();
-	mapSrc = mapSrc.replace(
-			'staticmap?',
-			'staticmap?center=' + avgLoc) + '&zoom=15';
+	if (options[STORAGE_ADD_ZOOM_MAP]) {
+		// Make separate density map but with modified src.
+		var newMap = bigMap.cloneNode(true);
+		var avgLoc = avgX.toString() + ',' + avgY.toString();
+		mapSrc = mapSrc.replace(
+				'staticmap?',
+				'staticmap?center=' + avgLoc) + '&zoom=15';
 
-	newMap.setAttribute('SRC', mapSrc);
-	bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
+		newMap.setAttribute('SRC', mapSrc);
+		bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
 
-	// Move stats to second page.
-	var title2 = actualTitle.cloneNode(true);
-	title2.children[1].innerText += ' Zoomed-In Map';
-	newMap.parentElement.insertBefore(title2, newMap);
-	newMap.parentElement.insertBefore(noteOrInfo, newMap);
+		// Move stats to second page.
+		var title2 = actualTitle.cloneNode(true);
+		title2.children[1].innerText += ' Zoomed-In Map';
+		newMap.parentElement.insertBefore(title2, newMap);
+		newMap.parentElement.insertBefore(noteOrInfo, newMap);
+	}
 	
 	// Duplicate territory name.
 	var title3 = actualTitle.cloneNode(true);
@@ -326,4 +347,14 @@ var main = function() {
 	}
 };
 
-main();
+chrome.storage.sync.get(Object.keys(Options), function(items) {
+	var options = {};
+	for (var property in Options) {
+		if (items[property] !== undefined) {
+			options[property] = items[property];
+		} else {
+			options[property] = Options[property];
+		}
+	}
+	main(options);
+});

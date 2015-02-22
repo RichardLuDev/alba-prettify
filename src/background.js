@@ -17,11 +17,11 @@ if (!Extension.isDevMode() || Debug.ANALYTICS) {
 }
 
 // Record version change events exactly once per user.
-chrome.storage.sync.get(Storage.VERSION, function(items) {
+chrome.storage.sync.get(STORAGE_VERSION, function(items) {
 	var version = Extension.getVersion();
-	if (items[Storage.VERSION] !== version) {
+	if (items[STORAGE_VERSION] !== version) {
 		var items = {};
-		items[Storage.VERSION] = version;
+		items[STORAGE_VERSION] = version;
 		chrome.storage.sync.set(items, function() {
 			Analytics.recordEvent('background', 'start', version);
 		});

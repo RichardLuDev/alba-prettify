@@ -12,17 +12,17 @@ Extension.isDevMode = function() {
     return !('update_url' in chrome.runtime.getManifest());
 };
 
-// Storage key names
-var Storage = {
-	VERSION: 'version',
-	REMOVE_MARKERS: 'remove-markers',
-	REMOVE_NAMES: 'remove-names',
-};
+// Storage keys, using variables as typos become errors.
+var STORAGE_VERSION = 'version';
+var STORAGE_REMOVE_MARKERS = 'remove-markers';
+var STORAGE_REMOVE_NAMES = 'remove-names';
+var STORAGE_ADD_ZOOM_MAP = 'add-zoom-map';
 
 // Options: ID -> default value
 var Options = {};
-Options[Storage.REMOVE_NAMES] = false;
-Options[Storage.REMOVE_MARKERS] = false;
+Options[STORAGE_REMOVE_NAMES] = false;
+Options[STORAGE_REMOVE_MARKERS] = false;
+Options[STORAGE_ADD_ZOOM_MAP] = true;
 
 // Analytics reporting functions
 var Analytics = {};

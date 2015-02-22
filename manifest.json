@@ -37,8 +37,7 @@
 	"content_scripts": [
 		{
 			"matches": [
-				"http://www.baseloc.com/alba/print/*",
-				"http://www.baseloc.com/alba/campaign/*"
+				"http://www.baseloc.com/alba/print/*"
 			],
 			"css": [
 				"res/print.css"

@@ -21,8 +21,8 @@ var Storage = {
 
 // Options: ID -> default value
 var Options = {};
-Options[Storage.REMOVE_MARKERS] = false;
 Options[Storage.REMOVE_NAMES] = false;
+Options[Storage.REMOVE_MARKERS] = false;
 
 // Analytics reporting functions
 var Analytics = {};

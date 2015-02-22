@@ -16,7 +16,8 @@ var main = function() {
 	var mobileCodeParent = mobileCode.parentElement;
 	var overallCard = document.getElementsByClassName('card')[0];
 	var all_url = window.location.href + '&nv';
-	var actualTitle = smallMapParent.previousSibling;  // Accommodate optional territory 'Notes'.
+	// Accommodate optional territory 'Notes'.
+	var actualTitle = smallMapParent.previousSibling;  
 	while (actualTitle.tagName != 'H1') {
 		actualTitle = actualTitle.previousSibling;
 	}
@@ -58,7 +59,8 @@ var main = function() {
 			} else {
 				// Remove 'Name' in 'Name & Telephone'.
 				for (var i = 0; i < headings.length; ++i) {
-					if (headings[i].innerText.toLowerCase() === 'name & telephone') {
+					if (headings[i].innerText.toLowerCase() ===
+							'name & telephone') {
 						headings[i].innerText = 'TELEPHONE';
 						break;
 					}
@@ -69,16 +71,17 @@ var main = function() {
 			var trs = tbody.getElementsByTagName('tr');
 			for (var i = trs.length - 1; i >= 0; --i) {
 				var idField = trs[i].children[0];
-			  	var status = trs[i].children[1];
+			  	var statusField = trs[i].children[1];
 				var language = trs[i].children[2];
 				var nameAndTelephone = trs[i].children[3];
 				var address = trs[i].children[4];
 				var notes = trs[i].children[5];
 				var checkboxes = trs[i].children[6];
 				
+				var status = statusField.innerText;
 				// Separate rows based on table.
-				if ((idx === INVALID_TABLE && status.innerText !== NOT_VALID_STATUS) ||
-						(idx === VALID_TABLE && status.innerText === NOT_VALID_STATUS)) {
+				if ((idx === INVALID_TABLE && status !== NOT_VALID_STATUS) ||
+						(idx === VALID_TABLE && status === NOT_VALID_STATUS)) {
 					tbody.removeChild(trs[i]);
 					continue;
 				}
@@ -87,7 +90,7 @@ var main = function() {
 				if (idx === INVALID_TABLE) {
 					// Only keep language, address, and notes for invalid calls.
 					trs[i].removeChild(idField);
-					trs[i].removeChild(status);
+					trs[i].removeChild(statusField);
 					trs[i].removeChild(nameAndTelephone);
 					trs[i].removeChild(checkboxes);
 				} else {
@@ -98,7 +101,8 @@ var main = function() {
 					// Remove name.
 					if (nameAndTelephone.children.length >= 2 &&
 							nameAndTelephone.children[0].tagName === 'STRONG') {
-						nameAndTelephone.removeChild(nameAndTelephone.children[0]);
+						nameAndTelephone.removeChild(
+								nameAndTelephone.children[0]);
 					}
 				}
 				
@@ -116,7 +120,8 @@ var main = function() {
 						address.removeChild(address.children[0]);
 					} else if (address.children[0].tagName === 'STRIKE') {
 						var child = address.children[0];
-						if (child.children.length >= 1 && child.children[0].tagName === 'SPAN') {
+						if (child.children.length >= 1 &&
+								child.children[0].tagName === 'SPAN') {
 							child.removeChild(child.children[0]);
 						}
 					}
@@ -143,17 +148,21 @@ var main = function() {
 				}
 			// Color changes when street changes
 			} else {
-				// /[,?#\d]* / - Matches the first bits of the street number, enforcing ending in space.
-				// /[\d]*[a-zA-Z]+(?!\d)/ - Street names can start with numbers, 1st, etc, but must not contain
-				//                          any letters followed by numbers, as those are postal codes.
-				// ((?:[\d]*[a-zA-Z]+(?!\d) ?)*) - Capture the full street name, possibly repeats with 'St W'.
+				// /[,?#\d]* / - Matches the first bits of the street number, enforcing
+				//		ending in space.
+				// /[\d]*[a-zA-Z]+(?!\d)/ - Street names can start with numbers, 1st,
+				//		etc, but must not contain any letters followed by numbers, as
+				//		those are postal codes.
+				// ((?:[\d]*[a-zA-Z]+(?!\d) ?)*) - Capture the full street name,
+				//		possibly repeats with 'St W'.
 				var STREET_ADDRESS = /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/;
 				var CSS_CLASSES = ['light', 'dark'];
 				var css_index = 1;
 				for (var i = 0; i < trs.length - 1; ++i) {
 					trs[i].classList.add(CSS_CLASSES[css_index]);
 					var curStreet = STREET_ADDRESS.exec(trs[i].children[4].innerText);
-					var nextStreet = STREET_ADDRESS.exec(trs[i + 1].children[4].innerText);
+					var nextStreet = STREET_ADDRESS.exec(
+							trs[i + 1].children[4].innerText);
 					if (curStreet[1] !== nextStreet[1]) {
 						css_index = 1 - css_index;
 					}
@@ -256,7 +265,10 @@ var main = function() {
 	
 	// Make separate density map but with modified src.
 	var newMap = bigMap.cloneNode(true);
-	mapSrc = mapSrc.replace('staticmap?', 'staticmap?center=' + avgX.toString() + ',' + avgY.toString()) + '&zoom=15';
+	var avgLoc = avgX.toString() + ',' + avgY.toString();
+	mapSrc = mapSrc.replace(
+			'staticmap?',
+			'staticmap?center=' + avgLoc) + '&zoom=15';
 
 	newMap.setAttribute('SRC', mapSrc);
 	bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
@@ -289,7 +301,8 @@ var main = function() {
 	nc.childNodes[1].textContent = ' 不是中国人 ';
 	var ncs = nn.cloneNode(true);
 	ncs.children[0].innerText = 'NCS';
-	ncs.children[1].innerText = 'Not Chinese Speaking (looks Chinese but doesn\'t speak it)';
+	ncs.children[1].innerText =
+			'Not Chinese Speaking (looks Chinese but doesn\'t speak it)';
 	ncs.childNodes[1].textContent = ' 看似中国人但不说中文 ';
 	var dnc = nn.cloneNode(true);
 	dnc.children[0].innerText = 'DNC';

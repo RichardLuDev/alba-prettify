@@ -31,15 +31,14 @@ chrome.runtime.onInstalled.addListener(function(details) {
 	});
 	
 	// Show page action only on baseloc print page
-	var baseloc_print_rule = {
-		conditions: [
-			new chrome.declarativeContent.PageStateMatcher({
-				pageUrl: { urlMatches: 'http://www.baseloc.com/alba/print/*' },
-			}),
-		],
-		actions: [ new chrome.declarativeContent.ShowPageAction() ],
-	};
 	chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-		chrome.declarativeContent.onPageChanged.addRules([baseloc_print_rule]);
+		chrome.declarativeContent.onPageChanged.addRules([{
+			conditions: [
+				new chrome.declarativeContent.PageStateMatcher({
+					pageUrl: { urlMatches: 'http://www.baseloc.com/alba/print/*' },
+				}),
+			],
+			actions: [ new chrome.declarativeContent.ShowPageAction() ],
+		}]);
 	});
 });

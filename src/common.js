@@ -1,7 +1,5 @@
 // Debug flags
-var Debug = {
-	ANALYTICS: false,
-};
+var DEBUG_ANALYTICS = false;
 
 // Extension property shortcuts
 var Extension = {};

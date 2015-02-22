@@ -1,4 +1,6 @@
-Analytics.recordEvent('popup', 'open');
+var POPUP = 'popup';
+
+Analytics.recordEvent(POPUP, 'open');
 
 // Difference between default and user selected is in whether the value is
 // undefined or whether it has a value.
@@ -17,7 +19,9 @@ chrome.storage.sync.get(Object.keys(Options), function(items) {
 			optionElement.addEventListener('click', function() {
 				var items = {};
 				items[name] = this.checked;
-				chrome.storage.sync.set(items);
+				chrome.storage.sync.set(items, function() {
+					Analytics.recordEvent(POPUP, 'click', name);
+				});
 			});
 		})(property);
 	}

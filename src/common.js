@@ -31,10 +31,10 @@ Analytics.recordEvent = function(category, action, label, value) {
 		'type': 'analytics',
 		'object': {
 			'hitType': 'event',
-			'category': category,
-			'action': action,
-			'label': label,
-			'value': value,
+			'eventCategory': category,
+			'eventAction': action,
+			'eventLabel': label,
+			'eventValue': value,
 		},
 	});
 };

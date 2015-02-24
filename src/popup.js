@@ -2,6 +2,12 @@ var POPUP = 'popup';
 
 Analytics.recordEvent(POPUP, 'open');
 
+// Add version number to subject of feedback email.
+(function() {
+	var feedbackLink = document.getElementById('feedback-link');
+	feedbackLink.href += '?subject=v' + Extension.getVersion() + ' Feedback: [topic]';
+})();
+
 // Difference between default and user selected is in whether the value is
 // undefined or whether it has a value.
 chrome.storage.sync.get(Object.keys(Options), function(items) {

@@ -14,13 +14,21 @@ Extension.isDevMode = function() {
 var STORAGE_VERSION = 'version';
 var STORAGE_REMOVE_MARKERS = 'remove-markers';
 var STORAGE_REMOVE_NAMES = 'remove-names';
+var STORAGE_REMOVE_LEGEND = 'remove-legend';
+var STORAGE_ADD_ASSIGNMENT_BOX = 'add-assignment-box';
+var STORAGE_ADD_MAP = 'add-map';
 var STORAGE_ADD_ZOOM_MAP = 'add-zoom-map';
+var STORAGE_ADD_MOBILE_CODE = 'add-mobile-code';
 
 // Options: ID -> default value
 var Options = {};
 Options[STORAGE_REMOVE_NAMES] = false;
 Options[STORAGE_REMOVE_MARKERS] = false;
+Options[STORAGE_REMOVE_LEGEND] = true;
+Options[STORAGE_ADD_ASSIGNMENT_BOX] = true;
+Options[STORAGE_ADD_MAP] = true;
 Options[STORAGE_ADD_ZOOM_MAP] = true;
+Options[STORAGE_ADD_MOBILE_CODE] = false;
 
 // Analytics reporting functions
 var Analytics = {};

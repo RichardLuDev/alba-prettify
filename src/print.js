@@ -1,3 +1,5 @@
+'use strict';
+
 chrome.storage.onChanged.addListener(function(changes, areaName) {
 	if (areaName === 'sync') {
 		for (var property in changes) {
@@ -26,6 +28,7 @@ var main = function(options) {
 	var mobileCode = document.getElementsByClassName('directions')[0];
 	var mobileCodeParent = mobileCode.parentElement;
 	var overallCard = document.getElementsByClassName('card')[0];
+	var campaignText = document.querySelector('.campaign');
 	var all_url = window.location.href + '&nv';
 	// Accommodate optional territory 'Notes'.
 	var actualTitle = smallMapParent.previousSibling;  
@@ -195,6 +198,13 @@ var main = function(options) {
 	});
 	overallCard.appendChild(table);
 	
+	// Fix campaign text.
+	if (campaignText) {
+		var campaignTextParent = campaignText.parentElement;
+		overallCard.insertBefore(campaignText, overallCard.firstChild);
+		overallCard.removeChild(campaignTextParent);
+	}
+	
 	// Remove territory notes
 	if (noteOrInfo.children.length === 1 &&
 			noteOrInfo.children[0].tagName === 'STRONG' &&
@@ -207,95 +217,76 @@ var main = function(options) {
 	// Add assignment box with Name and stuff.
 	if (options[STORAGE_ADD_ASSIGNMENT_BOX]) {
 		var assignmentBox = document.createElement('DIV');
-		assignmentBox.innerHTML = 'Name:<br><br>Return By:<br>';
+		assignmentBox.innerHTML =
+				'Name:<span class="assignment-box-separator"></span>Return By:';
 		assignmentBox.className = 'assignment-box';
-		bigMapParentParent.insertBefore(assignmentBox, bigMapParent);
+		overallCard.insertBefore(assignmentBox, overallCard.firstChild);
 	}
 	
-	if (options[STORAGE_ADD_MAP]) {
-		// Parse all markers.
-		var src = bigMapSrc.split('?');
-		src.shift();
-		src = src.join('?');
-		src = src.split('&');
-		var parseQueryString = function(a) {
-			if (a == '') return {};
-			var b = {};
-			for (var i = 0; i < a.length; ++i)
-			{
-				if (!a[i]) {
-					continue;
-				}
-				var p=a[i].split('=');
-				if (p.length != 2) continue;
-				var name=p[0], value=decodeURIComponent(p[1].replace(/\+/g, ' '));
-				if (b[name]) {
-					if (b[name] instanceof Array) {
-						b[name].push(value);
-					} else {
-						b[name] = [b[name], value];
-					}
-				} else {
-					b[name] = value;
-				}
+	// Parse all markers.
+	var src = bigMapSrc.split('?');
+	src.shift();
+	src = src.join('?');
+	src = src.split('&');
+	var parseQueryString = function(a) {
+		if (a == '') return {};
+		var b = {};
+		for (var i = 0; i < a.length; ++i)
+		{
+			if (!a[i]) {
+				continue;
 			}
-			return b;
-		};
-		var params = parseQueryString(src);
-		var markers = params.markers;
-		if (typeof markers === 'string') {
-			var vals = markers.split('|');
-			markers = [''];
-			var initial = '';
-			for (var i=0;i<vals.length;i++) {
-				if (vals[i][0] < '1' || vals[i][0] > '9') {
-					initial += vals[i] + '|';
+			var p=a[i].split('=');
+			if (p.length != 2) continue;
+			var name=p[0], value=decodeURIComponent(p[1].replace(/\+/g, ' '));
+			if (b[name]) {
+				if (b[name] instanceof Array) {
+					b[name].push(value);
 				} else {
-					markers.push(vals[i]);
+					b[name] = [b[name], value];
 				}
+			} else {
+				b[name] = value;
 			}
-			markers[0] = initial;
 		}
-		var avgX = 0, avgY = 0;
-		for (var i=1;i<markers.length;i++) {
-			var vals = markers[i].split('|');
-			var obj = {};
-			obj.original = markers[i];
-			for (var j=0;j<vals.length;j++) {
-				if (vals[j].indexOf(',') !== -1) {
-					var v = vals[j].split(',');
-					obj.x = parseFloat(v[0]);
-					obj.y = parseFloat(v[1]);
-					avgX += obj.x;
-					avgY += obj.y;
-				} else {
-					obj[j] = vals[j];
-				}
+		return b;
+	};
+	var params = parseQueryString(src);
+	var markers = params.markers;
+	if (typeof markers === 'string') {
+		var vals = markers.split('|');
+		markers = [''];
+		var initial = '';
+		for (var i=0;i<vals.length;i++) {
+			if (vals[i][0] < '1' || vals[i][0] > '9') {
+				initial += vals[i] + '|';
+			} else {
+				markers.push(vals[i]);
 			}
-			markers[i] = obj;
 		}
-		if (markers.length > 1) {
-			avgX /= markers.length - 1;
-			avgY /= markers.length - 1;
+		markers[0] = initial;
+	}
+	var avgX = 0, avgY = 0;
+	for (var i=1;i<markers.length;i++) {
+		var vals = markers[i].split('|');
+		var obj = {};
+		obj.original = markers[i];
+		for (var j=0;j<vals.length;j++) {
+			if (vals[j].indexOf(',') !== -1) {
+				var v = vals[j].split(',');
+				obj.x = parseFloat(v[0]);
+				obj.y = parseFloat(v[1]);
+				avgX += obj.x;
+				avgY += obj.y;
+			} else {
+				obj[j] = vals[j];
+			}
 		}
-		
-		// Easier to see small black than small white.
-		var mapSrc = bigMapSrc.replace('color:white', 'color:black');
-		// Cleanup unused fields.
-		mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
-		mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
-		if (options[STORAGE_REMOVE_MARKERS]) {
-			mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
-		}
-		bigMap.setAttribute('SRC', mapSrc);
-	
-		// Duplicate territory name.
-		var title3 = actualTitle.cloneNode(true);
-		title3.children[1].innerText += ' Map';
-		bigMapParentParent.insertBefore(title3, bigMapParent);
-	} else {
-		// No Big Map
-		bigMapParentParent.removeChild(bigMapParent);
+		markers[i] = obj;
+	}
+	if (markers.length > 1) {
+		avgX /= markers.length - 1;
+		avgY /= markers.length - 1;
 	}
 	
 	if (options[STORAGE_ADD_ZOOM_MAP]) {
@@ -324,9 +315,29 @@ var main = function(options) {
 		newMap.parentElement.insertBefore(noteOrInfo, newMap);
 	}
 	
+	if (options[STORAGE_ADD_MAP]) {
+		// Easier to see small black than small white.
+		var mapSrc = bigMapSrc.replace('color:white', 'color:black');
+		// Cleanup unused fields.
+		mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
+		mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
+		if (options[STORAGE_REMOVE_MARKERS]) {
+			mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
+		}
+		bigMap.setAttribute('SRC', mapSrc);
+
+		// Duplicate territory name.
+		var title3 = actualTitle.cloneNode(true);
+		title3.children[1].innerText += ' Map';
+		bigMapParentParent.insertBefore(title3, bigMapParent);
+	} else {
+		// No Big Map
+		bigMapParentParent.removeChild(bigMapParent);
+	}
+	
 	// Remove mobile QR code
 	if (options[STORAGE_ADD_MOBILE_CODE]) {
-		overallCard.insertBefore(mobileCode, actualTitle);
+		overallCard.insertBefore(mobileCode, overallCard.firstChild);
 	} else {
 		if (mobileCode.children.length > 0) {
 			mobileCode.children[0].setAttribute('SRC', '');

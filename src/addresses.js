@@ -1,3 +1,5 @@
+'use strict';
+
 var ADDRESSES = 'addresses';
 var SAVE_ID = 'alba-prettify-export-save';
 
@@ -6,7 +8,7 @@ document.querySelector('.cmd-export').addEventListener('click', function() {
 	if (saveElement === null) {
 		var saveElement = document.createElement('button');
 		saveElement.id = SAVE_ID;
-		saveElement.title = 'From Alba Prettify';
+		saveElement.title = 'Added by Alba Prettify';
 		var saveText = document.createTextNode('Save backup file');
 		saveElement.appendChild(saveText);
 		this.parentNode.insertBefore(saveElement, this);

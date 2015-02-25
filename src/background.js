@@ -1,3 +1,5 @@
+'use strict';
+
 var BACKGROUND = 'background';
 
 // Google analytics tracking only for live extension or testing.

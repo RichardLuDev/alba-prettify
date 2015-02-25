@@ -1,3 +1,5 @@
+'use strict';
+
 // Debug flags
 var DEBUG_ANALYTICS = false;
 

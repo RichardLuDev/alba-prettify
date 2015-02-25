@@ -1,5 +1,5 @@
 @page {
-	margin: 0.25in 0.5in 0.25in 0.5in;
+	margin: 0.25in;
 }
 
 @media screen {
@@ -9,13 +9,17 @@
 	}
 
 	div.card {
-		margin: 0.25in 0.5in 0.25in 0.5in;
+		margin: 0.25in;
 		max-width: 8in;
 	}
 }
 
+body div.card {
+	border: none;
+}
+
 div.card > h1 {
-	margin: 10pt 0 8pt 0;
+	margin: 0 0 6px 0;
 }
 
 div.card > div.right-corner {
@@ -31,10 +35,16 @@ div > img.map {
 }
 
 div.assignment-box {
-    border: 1px solid black;
-    width: 200px;
-    padding: 10px;
-    margin-bottom: 10px;
+	border: 1px solid black;
+	width: 325px;
+	padding: 10px;
+	margin-bottom: 10px;
+	float: right;
+}
+
+span.assignment-box-separator {
+	display: inline-block;
+	width: 100px;
 }
 
 table.addresses {

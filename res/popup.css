@@ -1,7 +1,11 @@
 div.wrapper {
-	width: 250px;
+	width: 215px;
 }
 
 input {
 	vertical-align: text-top;
+}
+
+#help-link {
+	float: right;
 }

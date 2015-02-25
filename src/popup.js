@@ -1,3 +1,5 @@
+'use strict';
+
 var POPUP = 'popup';
 
 Analytics.recordEvent(POPUP, 'open');

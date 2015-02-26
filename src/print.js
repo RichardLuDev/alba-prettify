@@ -1,17 +1,17 @@
 'use strict';
 
-var parseQueryString = function( queryString ) {
-    var params = {};
-    var queries = queryString.split("&");
-    for (var i = 0; i < queries.length; i++ ) {
-        var temp = queries[i].split('=');
-				if (temp.length === 1) {
-					params[temp[0]] = '';
-				} else {
-					params[temp[0]] = temp[1];
-				}
-    }
-    return params;
+var parseQueryString = function(queryString) {
+	var params = {};
+	var queries = queryString.split("&");
+	for (var i = 0; i < queries.length; i++ ) {
+		var temp = queries[i].split('=');
+		if (temp.length === 1) {
+			params[temp[0]] = '';
+		} else {
+			params[temp[0]] = temp[1];
+		}
+	}
+	return params;
 };
 
 // Enforce we load the right page with as much data as possible.
@@ -47,7 +47,12 @@ chrome.storage.onChanged.addListener(function(changes, areaName) {
 	if (areaName === 'sync') {
 		for (var property in changes) {
 			if (property in Options) {
-				location.reload();
+				chrome.storage.sync.get(STORAGE_AUTO_REFRESH, function(items) {
+					if (items[STORAGE_AUTO_REFRESH] === false) {
+						return;
+					}
+					location.reload();
+				});
 				return;
 			}
 		}
@@ -83,12 +88,13 @@ var main = function(options) {
 
 	
 	var newTable = document.createElement('div');
-	newTable.appendChild(addressTable.cloneNode(true));
+	var invalidAddressTable = addressTable.cloneNode(true);
+	newTable.appendChild(invalidAddressTable);
 	var subheading = document.createElement('h2');
 	subheading.innerText = 'Not Valid Calls';
 	newTable.insertBefore(subheading, newTable.firstChild);
 
-	var addressTables = [addressTable, newTable];
+	var addressTables = [addressTable, invalidAddressTable];
 
 	var VALID_TABLE = 0;
 	var INVALID_TABLE = 1;
@@ -280,7 +286,7 @@ var main = function(options) {
 		var assignmentBox = document.createElement('DIV');
 		assignmentBox.innerHTML =
 				'Name:<span class="assignment-box-separator"></span>Return By:';
-		assignmentBox.className = 'assignment-box';
+		assignmentBox.classList.add('assignment-box');
 		overallCard.insertBefore(assignmentBox, overallCard.firstChild);
 	}
 	

@@ -19,6 +19,10 @@
 	
 	"content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",
 	
+	"web_accessible_resources": [
+		"res/print.css"
+	],
+	
 	"background": {
 		"scripts": [
 			"src/common.js",
@@ -38,9 +42,6 @@
 	"content_scripts": [{
 		"matches": [
 			"http://www.baseloc.com/alba/print/*"
-		],
-		"css": [
-			"res/print.css"
 		],
 		"js": [
 			"src/common.js",

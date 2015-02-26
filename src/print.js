@@ -15,33 +15,35 @@ var parseQueryString = function(queryString) {
 };
 
 // Enforce we load the right page with as much data as possible.
-(function() {
-	var params = parseQueryString(location.search.substring(1));
-	var needRefresh = false;
-	var requiredParams = {
-		nv: '',
-		m: '1',  // Primary map
-		o: '1',  // Overview map
-		l: '1',  // Legend
-		d: '1',  // Mobile QR code
-		g: '1',  // GPS coordinates
-	};
-	for (var key in requiredParams) {
-		if (params[key] === undefined ||
-				params[key] !== requiredParams[key]) {
-			params[key] = requiredParams[key];
-			needRefresh = true;
+chrome.storage.sync.get(STORAGE_ENABLE_EXTENSION, function(items) {
+	if (items[STORAGE_ENABLE_EXTENSION] !== false) {
+		var params = parseQueryString(location.search.substring(1));
+		var needRefresh = false;
+		var requiredParams = {
+			nv: '',
+			m: '1',  // Primary map
+			o: '1',  // Overview map
+			l: '1',  // Legend
+			d: '1',  // Mobile QR code
+			g: '1',  // GPS coordinates
+		};
+		for (var key in requiredParams) {
+			if (params[key] === undefined ||
+					params[key] !== requiredParams[key]) {
+				params[key] = requiredParams[key];
+				needRefresh = true;
+			}
+		}
+		if (needRefresh) {
+			var queryString = [];
+			for (var key in params) {
+				queryString.push(key + '=' + params[key]);
+			}
+			location.replace(
+					location.origin + location.pathname + '?' + queryString.join('&'));
 		}
 	}
-	if (needRefresh) {
-		var queryString = [];
-		for (var key in params) {
-			queryString.push(key + '=' + params[key]);
-		}
-		location.replace(
-				location.origin + location.pathname + '?' + queryString.join('&'));
-	}
-})();
+});
 
 chrome.storage.onChanged.addListener(function(changes, areaName) {
 	if (areaName === 'sync') {
@@ -61,6 +63,12 @@ chrome.storage.onChanged.addListener(function(changes, areaName) {
 
 var main = function(options) {
 	Analytics.recordPageView();
+	
+	// Add custom CSS.
+	var cssLink = document.createElement('link');
+	cssLink.rel = 'stylesheet';
+	cssLink.href = chrome.extension.getURL('res/print.css');
+	document.head.appendChild(cssLink);
 
 	/* Grab all elements that are to be manipulated later. */
 	var bigMap = document.querySelector('.map');
@@ -265,19 +273,12 @@ var main = function(options) {
 	}
 	
 	// Remove mobile QR code
-	if (mobileCode.firstElementChild) {
-		mobileCode.firstElementChild.src = '';
-	}
 	if (options[STORAGE_ADD_MOBILE_CODE]) {
-		// Use non-deprecated API.
-		if (mobileCode.firstElementChild) {
-			mobileCode.firstElementChild.src =
-					'http://api.qrserver.com/v1/create-qr-code/?data=' + 
-					encodeURIComponent(mobileCode.href) + 
-					'&size=75x75&format=svg';
-		}
 		overallCard.insertBefore(mobileCode, overallCard.firstChild);
 	} else {
+		if (mobileCode.firstElementChild) {
+			mobileCode.firstElementChild.src = '';
+		}
 		mobileCodeParent.removeChild(mobileCode);
 	}
 	
@@ -351,12 +352,10 @@ var main = function(options) {
 
 		newMap.setAttribute('SRC', mapSrc);
 		bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
-
-		// Move stats to second page.
+		
 		var title2 = actualTitle.cloneNode(true);
 		title2.children[1].innerText += ' Zoomed-In Map';
 		newMap.parentElement.insertBefore(title2, newMap);
-		newMap.parentElement.insertBefore(noteOrInfo, newMap);
 	}
 	
 	if (options[STORAGE_ADD_MAP]) {
@@ -374,6 +373,9 @@ var main = function(options) {
 		var title3 = actualTitle.cloneNode(true);
 		title3.children[1].innerText += ' Map';
 		bigMapParentParent.insertBefore(title3, bigMapParent);
+
+		// Move stats to first page.
+		bigMapParentParent.insertBefore(noteOrInfo, bigMapParent);
 	} else {
 		// No Big Map
 		bigMapParentParent.removeChild(bigMapParent);
@@ -389,7 +391,7 @@ var main = function(options) {
 		}
 		
 		// Add better Chinese legend
-		if (actualTitle.innerText.indexOf('Chinese') !== -1) {
+		/*if (actualTitle.innerText.indexOf('Chinese') !== -1) {
 			var nn = firstLegend.cloneNode(true);
 			nn.children[0].innerText = 'NN';
 			nn.children[1].innerText = 'New Number';
@@ -412,7 +414,7 @@ var main = function(options) {
 			brElementParent.insertBefore(nc, brElement);
 			brElementParent.insertBefore(ncs, brElement);
 			brElementParent.insertBefore(dnc, brElement);
-		}
+		}*/
 	}
 	
 	// Remove break
@@ -425,14 +427,16 @@ var main = function(options) {
 
 document.addEventListener("DOMContentLoaded", function(event) {
 	chrome.storage.sync.get(Object.keys(Options), function(items) {
-		var options = {};
-		for (var property in Options) {
-			if (items[property] !== undefined) {
-				options[property] = items[property];
-			} else {
-				options[property] = Options[property];
+		if (items[STORAGE_ENABLE_EXTENSION] !== false) {
+			var options = {};
+			for (var property in Options) {
+				if (items[property] !== undefined) {
+					options[property] = items[property];
+				} else {
+					options[property] = Options[property];
+				}
 			}
+			main(options);
 		}
-		main(options);
 	});
 });

@@ -14,6 +14,7 @@ Extension.isDevMode = function() {
 
 // Storage keys, using variables as typos become errors.
 var STORAGE_VERSION = 'version';
+var STORAGE_ENABLE_EXTENSION = 'enable-extension';
 var STORAGE_AUTO_REFRESH = 'auto-refresh';
 var STORAGE_REMOVE_MARKERS = 'remove-markers';
 var STORAGE_REMOVE_NAMES = 'remove-names';
@@ -25,6 +26,7 @@ var STORAGE_ADD_MOBILE_CODE = 'add-mobile-code';
 
 // Options: ID -> default value
 var Options = {};
+Options[STORAGE_ENABLE_EXTENSION] = true;
 Options[STORAGE_AUTO_REFRESH] = true;
 Options[STORAGE_REMOVE_NAMES] = false;
 Options[STORAGE_REMOVE_MARKERS] = false;

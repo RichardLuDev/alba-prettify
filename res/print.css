@@ -34,6 +34,10 @@ div > img.map {
 	page-break-after: always;
 }
 
+a.directions {
+	margin: 0 4px;
+}
+
 div.assignment-box {
 	border: 1px solid black;
 	width: 325px;

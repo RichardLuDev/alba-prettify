@@ -43,11 +43,10 @@
 			"res/print.css"
 		],
 		"js": [
-			"lib/jquery-2.1.1.min.js",
 			"src/common.js",
 			"src/print.js"
 		],
-		"run_at": "document_end"
+		"run_at": "document_start"
 	}, {
 		"matches": [
 			"http://www.baseloc.com/alba/addresses*"

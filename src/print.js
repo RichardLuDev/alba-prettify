@@ -1,5 +1,48 @@
 'use strict';
 
+var parseQueryString = function( queryString ) {
+    var params = {};
+    var queries = queryString.split("&");
+    for (var i = 0; i < queries.length; i++ ) {
+        var temp = queries[i].split('=');
+				if (temp.length === 1) {
+					params[temp[0]] = '';
+				} else {
+					params[temp[0]] = temp[1];
+				}
+    }
+    return params;
+};
+
+// Enforce we load the right page with as much data as possible.
+(function() {
+	var params = parseQueryString(location.search.substring(1));
+	var needRefresh = false;
+	var requiredParams = {
+		nv: '',
+		m: '1',  // Primary map
+		o: '1',  // Overview map
+		l: '1',  // Legend
+		d: '1',  // Mobile QR code
+		g: '1',  // GPS coordinates
+	};
+	for (var key in requiredParams) {
+		if (params[key] === undefined ||
+				params[key] !== requiredParams[key]) {
+			params[key] = requiredParams[key];
+			needRefresh = true;
+		}
+	}
+	if (needRefresh) {
+		var queryString = [];
+		for (var key in params) {
+			queryString.push(key + '=' + params[key]);
+		}
+		location.replace(
+				location.origin + location.pathname + '?' + queryString.join('&'));
+	}
+})();
+
 chrome.storage.onChanged.addListener(function(changes, areaName) {
 	if (areaName === 'sync') {
 		for (var property in changes) {
@@ -15,21 +58,22 @@ var main = function(options) {
 	Analytics.recordPageView();
 
 	/* Grab all elements that are to be manipulated later. */
-	var bigMap = document.getElementsByClassName('map')[0];
+	var bigMap = document.querySelector('.map');
+	var overallCard = document.querySelector('.card');
+	var campaignText = document.querySelector('.campaign');
+	var smallMap = document.querySelector('.overview');
+	var mobileCode = document.querySelector('.directions');
+	var addressTable = document.querySelector('.addresses');
+	
 	var bigMapSrc = bigMap.getAttribute('SRC');
 	var bigMapParent = bigMap.parentElement;
 	var bigMapParentParent = bigMapParent.parentElement;
-	var smallMap = document.getElementsByClassName('overview')[0];
 	var smallMapParent = smallMap.parentElement;
 	var smallMapParentParent = smallMapParent.parentElement;
 	var firstLegend = smallMapParent.nextSibling;
 	var brElement = smallMapParent.previousSibling;
 	var brElementParent = brElement.parentElement;
-	var mobileCode = document.getElementsByClassName('directions')[0];
 	var mobileCodeParent = mobileCode.parentElement;
-	var overallCard = document.getElementsByClassName('card')[0];
-	var campaignText = document.querySelector('.campaign');
-	var all_url = window.location.href + '&nv';
 	// Accommodate optional territory 'Notes'.
 	var actualTitle = smallMapParent.previousSibling;  
 	while (actualTitle.tagName != 'H1') {
@@ -37,166 +81,166 @@ var main = function(options) {
 	}
 	var noteOrInfo = actualTitle.nextSibling;
 
-	var table = document.createElement('div');
-	$(table).load(all_url + ' .addresses', function() {
-		var subheading = document.createElement('h2');
-		subheading.innerText = 'Not Valid Calls';
-		table.insertBefore(subheading, table.firstChild);
+	
+	var newTable = document.createElement('div');
+	newTable.appendChild(addressTable.cloneNode(true));
+	var subheading = document.createElement('h2');
+	subheading.innerText = 'Not Valid Calls';
+	newTable.insertBefore(subheading, newTable.firstChild);
 
-		var addressTables = document.getElementsByClassName('addresses');
+	var addressTables = [addressTable, newTable];
 
-		var VALID_TABLE = 0;
-		var INVALID_TABLE = 1;
-		var NOT_VALID_STATUS = 'Not valid';
-		for (var idx = addressTables.length - 1; idx >= 0; idx--) {
-			var addressTable = addressTables[idx];
-			
-			var thead = addressTable.getElementsByTagName('thead')[0];
-			var headingRow = thead.getElementsByTagName('tr')[0];
-			var headings = thead.getElementsByTagName('th');
-			if (idx === INVALID_TABLE) {
-				// Remove all but the status and address columns for invalids.
-				for (var i = headings.length - 1; i >= 0; --i) {
-					if (headings[i].innerText.toLowerCase() !== 'language' &&
-							headings[i].innerText.toLowerCase() !== 'address' &&
-							headings[i].innerText.toLowerCase() !== 'notes') {
-						headingRow.removeChild(headings[i]);
-					}
-				}
-				// Duplicate headings for second row.
-				var len = headings.length;
-				for (var i = 0; i < len; ++i) {
-					headingRow.appendChild(headings[i].cloneNode(true));
-				}
-				// Add CSS class to separate the tables
-				addressTable.classList.add('invalid');
-			} else {
-				if (options[STORAGE_REMOVE_NAMES]) {
-					// Remove 'Name' in 'Name & Telephone'.
-					for (var i = 0; i < headings.length; ++i) {
-						if (headings[i].innerText.toLowerCase() ===
-								'name & telephone') {
-							headings[i].innerText = 'TELEPHONE';
-							break;
-						}
-					}
+	var VALID_TABLE = 0;
+	var INVALID_TABLE = 1;
+	var NOT_VALID_STATUS = 'Not valid';
+	for (var idx = addressTables.length - 1; idx >= 0; idx--) {
+		var addressTable = addressTables[idx];
+		
+		var thead = addressTable.getElementsByTagName('thead')[0];
+		var headingRow = thead.getElementsByTagName('tr')[0];
+		var headings = thead.getElementsByTagName('th');
+		if (idx === INVALID_TABLE) {
+			// Remove all but the status and address columns for invalids.
+			for (var i = headings.length - 1; i >= 0; --i) {
+				if (headings[i].innerText.toLowerCase() !== 'language' &&
+						headings[i].innerText.toLowerCase() !== 'address' &&
+						headings[i].innerText.toLowerCase() !== 'notes') {
+					headingRow.removeChild(headings[i]);
 				}
 			}
-			
-			var tbody = addressTable.getElementsByTagName('tbody')[0];
-			var trs = tbody.getElementsByTagName('tr');
-			for (var i = trs.length - 1; i >= 0; --i) {
-				var idField = trs[i].children[0];
-			  	var statusField = trs[i].children[1];
-				var language = trs[i].children[2];
-				var nameAndTelephone = trs[i].children[3];
-				var address = trs[i].children[4];
-				var notes = trs[i].children[5];
-				var checkboxes = trs[i].children[6];
-				
-				var status = statusField.innerText;
-				// Separate rows based on table.
-				if ((idx === INVALID_TABLE && status !== NOT_VALID_STATUS) ||
-						(idx === VALID_TABLE && status === NOT_VALID_STATUS)) {
-					tbody.removeChild(trs[i]);
-					continue;
-				}
-
-				// Remove content.
-				if (idx === INVALID_TABLE) {
-					// Only keep language, address, and notes for invalid calls.
-					trs[i].removeChild(idField);
-					trs[i].removeChild(statusField);
-					trs[i].removeChild(nameAndTelephone);
-					trs[i].removeChild(checkboxes);
-				} else {
-					// Remove extra identifier for valid calls.
-					if (idField.children.length > 1) {
-						idField.removeChild(idField.children[1]);
-					}
-					
-					if (options[STORAGE_REMOVE_NAMES]) {
-						// Remove name.
-						if (nameAndTelephone.children.length >= 2 &&
-								nameAndTelephone.children[0].tagName === 'STRONG') {
-							nameAndTelephone.removeChild(
-									nameAndTelephone.children[0]);
-						}
-					}
-				}
-				
-				// Bold language column.
-				var languageText = language.innerText;
-				if (languageText.indexOf('Chinese') !== -1) {
-					// Chinese is redundant for Mandarin and Cantonese.
-					languageText = languageText.split(' ')[1];
-				}
-				language.innerHTML = '<strong>' + languageText + '</strong>';
-
-				// Remove geocode for both.
-				if (address.children.length >= 1) {
-					if (address.children[0].tagName === 'SPAN') {
-						address.removeChild(address.children[0]);
-					} else if (address.children[0].tagName === 'STRIKE') {
-						var child = address.children[0];
-						if (child.children.length >= 1 &&
-								child.children[0].tagName === 'SPAN') {
-							child.removeChild(child.children[0]);
-						}
-					}
-				}
+			// Duplicate headings for second row.
+			var len = headings.length;
+			for (var i = 0; i < len; ++i) {
+				headingRow.appendChild(headings[i].cloneNode(true));
 			}
-			
-			// Split invalid table into two.
-			if (idx === INVALID_TABLE) {
-				var mid = Math.ceil(trs.length / 2);
-				for (var i = 0; i < mid; ++i) {
-					var curRow = trs[i];
-					// Account for odd numbered tables.
-					if (mid >= trs.length) {
-						for (var j = curRow.children.length - 1; j >= 0; --j) {
-							curRow.appendChild(document.createElement('td'));
-						}
+			// Add CSS class to separate the tables
+			addressTable.classList.add('invalid');
+		} else {
+			if (options[STORAGE_REMOVE_NAMES]) {
+				// Remove 'Name' in 'Name & Telephone'.
+				for (var i = 0; i < headings.length; ++i) {
+					if (headings[i].innerText.toLowerCase() ===
+							'name & telephone') {
+						headings[i].innerText = 'TELEPHONE';
 						break;
 					}
-					var nextRow = trs[mid];
-					for (var j = 0; j < nextRow.children.length; ++j) {
-						curRow.appendChild(nextRow.children[j].cloneNode(true));
-					}
-					tbody.removeChild(nextRow);
-				}
-			// Color changes when street changes
-			} else {
-				// /[,?#\d]* / - Matches the first bits of the street number, enforcing
-				//		ending in space.
-				// /[\d]*[a-zA-Z]+(?!\d)/ - Street names can start with numbers, 1st,
-				//		etc, but must not contain any letters followed by numbers, as
-				//		those are postal codes.
-				// ((?:[\d]*[a-zA-Z]+(?!\d) ?)*) - Capture the full street name,
-				//		possibly repeats with 'St W'.
-				var STREET_ADDRESS = /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/;
-				var CSS_CLASSES = ['light', 'dark'];
-				var css_index = 1;
-				for (var i = 0; i < trs.length - 1; ++i) {
-					trs[i].classList.add(CSS_CLASSES[css_index]);
-					var curStreet = STREET_ADDRESS.exec(trs[i].children[4].innerText);
-					var nextStreet = STREET_ADDRESS.exec(
-							trs[i + 1].children[4].innerText);
-					if (curStreet[1] !== nextStreet[1]) {
-						css_index = 1 - css_index;
-					}
-				}
-				if (trs.length) {
-					trs[trs.length - 1].classList.add(CSS_CLASSES[css_index]);
 				}
 			}
 		}
 		
-		if (table.getElementsByTagName('tr').length <= 1) {
-			overallCard.removeChild(table);
+		var tbody = addressTable.getElementsByTagName('tbody')[0];
+		var trs = tbody.getElementsByTagName('tr');
+		for (var i = trs.length - 1; i >= 0; --i) {
+			var idField = trs[i].children[0];
+				var statusField = trs[i].children[1];
+			var language = trs[i].children[2];
+			var nameAndTelephone = trs[i].children[3];
+			var address = trs[i].children[4];
+			var notes = trs[i].children[5];
+			var checkboxes = trs[i].children[6];
+			
+			var status = statusField.innerText;
+			// Separate rows based on table.
+			if ((idx === INVALID_TABLE && status !== NOT_VALID_STATUS) ||
+					(idx === VALID_TABLE && status === NOT_VALID_STATUS)) {
+				tbody.removeChild(trs[i]);
+				continue;
+			}
+
+			// Remove content.
+			if (idx === INVALID_TABLE) {
+				// Only keep language, address, and notes for invalid calls.
+				trs[i].removeChild(idField);
+				trs[i].removeChild(statusField);
+				trs[i].removeChild(nameAndTelephone);
+				trs[i].removeChild(checkboxes);
+			} else {
+				// Remove extra identifier for valid calls.
+				if (idField.children.length > 1) {
+					idField.removeChild(idField.children[1]);
+				}
+				
+				if (options[STORAGE_REMOVE_NAMES]) {
+					// Remove name.
+					if (nameAndTelephone.children.length >= 2 &&
+							nameAndTelephone.children[0].tagName === 'STRONG') {
+						nameAndTelephone.removeChild(
+								nameAndTelephone.children[0]);
+					}
+				}
+			}
+			
+			// Bold language column.
+			var languageText = language.innerText;
+			if (languageText.indexOf('Chinese') !== -1) {
+				// Chinese is redundant for Mandarin and Cantonese.
+				languageText = languageText.split(' ')[1];
+			}
+			language.innerHTML = '<strong>' + languageText + '</strong>';
+
+			// Remove geocode for both.
+			if (address.children.length >= 1) {
+				if (address.children[0].tagName === 'SPAN') {
+					address.removeChild(address.children[0]);
+				} else if (address.children[0].tagName === 'STRIKE') {
+					var child = address.children[0];
+					if (child.children.length >= 1 &&
+							child.children[0].tagName === 'SPAN') {
+						child.removeChild(child.children[0]);
+					}
+				}
+			}
 		}
-	});
-	overallCard.appendChild(table);
+		
+		// Split invalid table into two.
+		if (idx === INVALID_TABLE) {
+			var mid = Math.ceil(trs.length / 2);
+			for (var i = 0; i < mid; ++i) {
+				var curRow = trs[i];
+				// Account for odd numbered tables.
+				if (mid >= trs.length) {
+					for (var j = curRow.children.length - 1; j >= 0; --j) {
+						curRow.appendChild(document.createElement('td'));
+					}
+					break;
+				}
+				var nextRow = trs[mid];
+				for (var j = 0; j < nextRow.children.length; ++j) {
+					curRow.appendChild(nextRow.children[j].cloneNode(true));
+				}
+				tbody.removeChild(nextRow);
+			}
+		// Color changes when street changes
+		} else {
+			// /[,?#\d]* / - Matches the first bits of the street number, enforcing
+			//		ending in space.
+			// /[\d]*[a-zA-Z]+(?!\d)/ - Street names can start with numbers, 1st,
+			//		etc, but must not contain any letters followed by numbers, as
+			//		those are postal codes.
+			// ((?:[\d]*[a-zA-Z]+(?!\d) ?)*) - Capture the full street name,
+			//		possibly repeats with 'St W'.
+			var STREET_ADDRESS = /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/;
+			var CSS_CLASSES = ['light', 'dark'];
+			var css_index = 1;
+			for (var i = 0; i < trs.length - 1; ++i) {
+				trs[i].classList.add(CSS_CLASSES[css_index]);
+				var curStreet = STREET_ADDRESS.exec(trs[i].children[4].innerText);
+				var nextStreet = STREET_ADDRESS.exec(
+						trs[i + 1].children[4].innerText);
+				if (curStreet[1] !== nextStreet[1]) {
+					css_index = 1 - css_index;
+				}
+			}
+			if (trs.length) {
+				trs[trs.length - 1].classList.add(CSS_CLASSES[css_index]);
+			}
+		}
+	}
+	
+	// Only add Not Valid table if it is non-empty.
+	if (newTable.getElementsByTagName('tr').length > 1) {
+		overallCard.appendChild(newTable);
+	}
 	
 	// Fix campaign text.
 	if (campaignText) {
@@ -214,6 +258,23 @@ var main = function(options) {
 		noteOrInfo = info;
 	}
 	
+	// Remove mobile QR code
+	if (mobileCode.firstElementChild) {
+		mobileCode.firstElementChild.src = '';
+	}
+	if (options[STORAGE_ADD_MOBILE_CODE]) {
+		// Use non-deprecated API.
+		if (mobileCode.firstElementChild) {
+			mobileCode.firstElementChild.src =
+					'http://api.qrserver.com/v1/create-qr-code/?data=' + 
+					encodeURIComponent(mobileCode.href) + 
+					'&size=75x75&format=svg';
+		}
+		overallCard.insertBefore(mobileCode, overallCard.firstChild);
+	} else {
+		mobileCodeParent.removeChild(mobileCode);
+	}
+	
 	// Add assignment box with Name and stuff.
 	if (options[STORAGE_ADD_ASSIGNMENT_BOX]) {
 		var assignmentBox = document.createElement('DIV');
@@ -227,30 +288,7 @@ var main = function(options) {
 	var src = bigMapSrc.split('?');
 	src.shift();
 	src = src.join('?');
-	src = src.split('&');
-	var parseQueryString = function(a) {
-		if (a == '') return {};
-		var b = {};
-		for (var i = 0; i < a.length; ++i)
-		{
-			if (!a[i]) {
-				continue;
-			}
-			var p=a[i].split('=');
-			if (p.length != 2) continue;
-			var name=p[0], value=decodeURIComponent(p[1].replace(/\+/g, ' '));
-			if (b[name]) {
-				if (b[name] instanceof Array) {
-					b[name].push(value);
-				} else {
-					b[name] = [b[name], value];
-				}
-			} else {
-				b[name] = value;
-			}
-		}
-		return b;
-	};
+	
 	var params = parseQueryString(src);
 	var markers = params.markers;
 	if (typeof markers === 'string') {
@@ -335,16 +373,6 @@ var main = function(options) {
 		bigMapParentParent.removeChild(bigMapParent);
 	}
 	
-	// Remove mobile QR code
-	if (options[STORAGE_ADD_MOBILE_CODE]) {
-		overallCard.insertBefore(mobileCode, overallCard.firstChild);
-	} else {
-		if (mobileCode.children.length > 0) {
-			mobileCode.children[0].setAttribute('SRC', '');
-		}
-		mobileCodeParent.removeChild(mobileCode);
-	}
-	
 	// Remove legend
 	if (options[STORAGE_REMOVE_LEGEND]) {
 		var next = smallMapParent.nextSibling;
@@ -385,18 +413,20 @@ var main = function(options) {
 	brElementParent.removeChild(brElement);
 	
 	// Remove small map
-	smallMap.setAttribute('SRC', '');
+	smallMap.setAttribute('src', '');
 	smallMapParentParent.removeChild(smallMapParent);
 };
 
-chrome.storage.sync.get(Object.keys(Options), function(items) {
-	var options = {};
-	for (var property in Options) {
-		if (items[property] !== undefined) {
-			options[property] = items[property];
-		} else {
-			options[property] = Options[property];
+document.addEventListener("DOMContentLoaded", function(event) {
+	chrome.storage.sync.get(Object.keys(Options), function(items) {
+		var options = {};
+		for (var property in Options) {
+			if (items[property] !== undefined) {
+				options[property] = items[property];
+			} else {
+				options[property] = Options[property];
+			}
 		}
-	}
-	main(options);
+		main(options);
+	});
 });

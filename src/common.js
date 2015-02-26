@@ -9,7 +9,7 @@ Extension.getVersion = function() {
 	return chrome.runtime.getManifest().version;
 };
 Extension.isDevMode = function() {
-    return !('update_url' in chrome.runtime.getManifest());
+  return !('update_url' in chrome.runtime.getManifest());
 };
 
 // Storage keys, using variables as typos become errors.
@@ -36,13 +36,13 @@ Options[STORAGE_ADD_MOBILE_CODE] = false;
 var Analytics = {};
 Analytics.recordEvent = function(category, action, label, value) {
 	chrome.runtime.sendMessage({
-		'type': 'analytics',
-		'object': {
-			'hitType': 'event',
-			'eventCategory': category,
-			'eventAction': action,
-			'eventLabel': label,
-			'eventValue': value,
+		type: 'analytics',
+		object: {
+			hitType: 'event',
+			eventCategory: category,
+			eventAction: action,
+			eventLabel: label,
+			eventValue: value,
 		},
 	});
 };
@@ -54,11 +54,11 @@ Analytics.recordPageView = function(page, title) {
 		title = document.title;
 	}
 	chrome.runtime.sendMessage({
-		'type': 'analytics',
-		'object': {
-			'hitType': 'pageview',
-			'page': page,
-			'title': title,
+		type: 'analytics',
+		object: {
+			hitType: 'pageview',
+			page: page,
+			title: title,
 		},
 	});
 };

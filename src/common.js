@@ -23,6 +23,7 @@ var STORAGE_ADD_ASSIGNMENT_BOX = 'add-assignment-box';
 var STORAGE_ADD_MAP = 'add-map';
 var STORAGE_ADD_ZOOM_MAP = 'add-zoom-map';
 var STORAGE_ADD_MOBILE_CODE = 'add-mobile-code';
+var STORAGE_ADD_NOT_VALID_NAMES = 'add-not-valid-names';
 
 // Options: ID -> default value
 var Options = {};
@@ -35,6 +36,7 @@ Options[STORAGE_ADD_ASSIGNMENT_BOX] = true;
 Options[STORAGE_ADD_MAP] = true;
 Options[STORAGE_ADD_ZOOM_MAP] = true;
 Options[STORAGE_ADD_MOBILE_CODE] = false;
+Options[STORAGE_ADD_NOT_VALID_NAMES] = false;
 
 // Analytics reporting functions
 var Analytics = {};

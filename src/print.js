@@ -46,9 +46,6 @@ var main = function(options) {
 	}
 	var noteOrInfo = actualTitle.nextSibling;
 	
-	// Remove small map
-	overallCard.removeChild(smallMapParent);
-	
 	// Add custom CSS.
 	var cssLink = document.createElement('link');
 	cssLink.rel = 'stylesheet';
@@ -168,6 +165,11 @@ var main = function(options) {
 		if (idx === INVALID_TABLE) {
 			// Remove all but the status and address columns for invalids.
 			for (var i = headings.length - 1; i >= 0; --i) {
+				if (headings[i].innerText.toLowerCase() === 'name & telephone' &&
+						options[STORAGE_ADD_NOT_VALID_NAMES]) {
+					headings[i].innerText = 'NAME';
+					continue;
+				}
 				if (headings[i].innerText.toLowerCase() !== 'language' &&
 						headings[i].innerText.toLowerCase() !== 'address' &&
 						headings[i].innerText.toLowerCase() !== 'notes') {
@@ -221,8 +223,17 @@ var main = function(options) {
 				// Only keep language, address, and notes for invalid calls.
 				trs[i].removeChild(idField);
 				trs[i].removeChild(statusField);
-				trs[i].removeChild(nameAndTelephone);
 				trs[i].removeChild(checkboxes);
+				if (options[STORAGE_ADD_NOT_VALID_NAMES]) {
+					if (nameAndTelephone.children.length >= 2 &&
+							nameAndTelephone.children[0].tagName === 'STRONG') {
+						nameAndTelephone.removeChild(nameAndTelephone.children[1]);
+					}
+					trs[i].children[3].classList.add('border');
+				} else {
+					trs[i].removeChild(nameAndTelephone);
+					trs[i].children[2].classList.add('border');
+				}
 			} else {
 				// Remove id and replace label.
 				if (idField.children.length > 1) {
@@ -377,7 +388,7 @@ var main = function(options) {
 		bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
 		
 		var title2 = actualTitle.cloneNode(true);
-		title2.children[1].innerText += ' Zoomed-In Map';
+		title2.children[1].innerText += ' Zoomed-In';
 		newMap.parentElement.insertBefore(title2, newMap);
 	}
 	
@@ -395,7 +406,6 @@ var main = function(options) {
 
 		// Duplicate territory name.
 		var title3 = actualTitle.cloneNode(true);
-		title3.children[1].innerText += ' Map';
 		bigMapParentParent.insertBefore(title3, bigMapParent);
 
 		// Move stats to first page.
@@ -413,36 +423,13 @@ var main = function(options) {
 			next = next.nextSibling;
 			overallCard.removeChild(toRemove);
 		}
-		
-		// Add better Chinese legend
-		/*if (actualTitle.innerText.indexOf('Chinese') !== -1) {
-			var nn = firstLegend.cloneNode(true);
-			nn.children[0].innerText = 'NN';
-			nn.children[1].innerText = 'New Number';
-			nn.childNodes[1].textContent = ' 新地址 ';
-			var nc = nn.cloneNode(true);
-			nc.children[0].innerText = 'NC';
-			nc.children[1].innerText = 'Not Chinese (does not look Chinese)';
-			nc.childNodes[1].textContent = ' 不是中国人 ';
-			var ncs = nn.cloneNode(true);
-			ncs.children[0].innerText = 'NCS';
-			ncs.children[1].innerText =
-					'Not Chinese Speaking (looks Chinese but doesn\'t speak it)';
-			ncs.childNodes[1].textContent = ' 看似中国人但不说中文 ';
-			var dnc = nn.cloneNode(true);
-			dnc.children[0].innerText = 'DNC';
-			dnc.children[1].innerText = 'Do Not Call';
-			dnc.childNodes[1].textContent = ' 住户请我们不要再来 ';
-			
-			brElementParent.insertBefore(nn, brElement);
-			brElementParent.insertBefore(nc, brElement);
-			brElementParent.insertBefore(ncs, brElement);
-			brElementParent.insertBefore(dnc, brElement);
-		}*/
 	}
 	
 	// Remove break
 	brElementParent.removeChild(brElement);
+	
+	// Remove small map
+	overallCard.removeChild(smallMapParent);
 	
 	Analytics.recordPageView();
 };

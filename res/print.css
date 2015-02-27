@@ -55,7 +55,7 @@ table.addresses {
 	margin-top: 4pt;
 }
 
-table.addresses.invalid td:nth-child(3) {
+table.addresses.invalid .border {
 	border-right: 2px solid #ddd;
 }
 

@@ -14,53 +14,6 @@ var parseQueryString = function(queryString) {
 	return params;
 };
 
-// Enforce we load the right page with as much data as possible.
-chrome.storage.sync.get(STORAGE_ENABLE_EXTENSION, function(items) {
-	if (items[STORAGE_ENABLE_EXTENSION] !== false) {
-		var params = parseQueryString(location.search.substring(1));
-		var needRefresh = false;
-		var requiredParams = {
-			nv: '',
-			m: '1',  // Primary map
-			o: '1',  // Overview map
-			l: '1',  // Legend
-			d: '1',  // Mobile QR code
-			g: '1',  // GPS coordinates
-		};
-		for (var key in requiredParams) {
-			if (params[key] === undefined ||
-					params[key] !== requiredParams[key]) {
-				params[key] = requiredParams[key];
-				needRefresh = true;
-			}
-		}
-		if (needRefresh) {
-			var queryString = [];
-			for (var key in params) {
-				queryString.push(key + '=' + params[key]);
-			}
-			location.replace(
-					location.origin + location.pathname + '?' + queryString.join('&'));
-		}
-	}
-});
-
-chrome.storage.onChanged.addListener(function(changes, areaName) {
-	if (areaName === 'sync') {
-		for (var property in changes) {
-			if (property in Options) {
-				chrome.storage.sync.get(STORAGE_AUTO_REFRESH, function(items) {
-					if (items[STORAGE_AUTO_REFRESH] === false) {
-						return;
-					}
-					location.reload();
-				});
-				return;
-			}
-		}
-	}
-});
-
 var main = function(options) {
 	/* Grab all elements that are to be manipulated later. */
 	var bigMap = document.querySelector('.map');
@@ -169,13 +122,13 @@ var main = function(options) {
 		maxX = Math.max(maxX, parsed[0]);
 		maxY = Math.max(maxY, parsed[1]);
 		
-		if (status !== NOT_VALID_STATUS &&
+		if (addressInfo.status !== NOT_VALID_STATUS &&
 				markerLabelIdx < markerLabels.length &&
 				(addressInfo.geocode[0] !== lastGeocode[0] ||
 				 addressInfo.geocode[1] !== lastGeocode[1])) {
 			addressInfo.label = markerLabels[markerLabelIdx++];
+			lastGeocode = addressInfo.geocode;
 		}
-		lastGeocode = addressInfo.geocode;
 	}
 	if (numAddresses !== 0) {
 		avgX /= numAddresses;
@@ -286,6 +239,12 @@ var main = function(options) {
 					if (nameAndTelephone.children.length >= 2 &&
 							nameAndTelephone.children[0].tagName === 'STRONG') {
 						nameAndTelephone.removeChild(nameAndTelephone.children[0]);
+					} else if (nameAndTelephone.children[0].tagName === 'STRIKE') {
+						var strikeElement = nameAndTelephone.children[0];
+						if (strikeElement.children.length >= 2 &&
+								strikeElement.children[0].tagName === 'STRONG') {
+							strikeElement.removeChild(strikeElement.children[0]);
+						}
 					}
 				}
 			}
@@ -488,7 +447,15 @@ var main = function(options) {
 	Analytics.recordPageView();
 };
 
-document.addEventListener("DOMContentLoaded", function(event) {
+var documentReady = new Promise(function documentReadyPromise(resolve) {
+	if (document.readyState === 'complete') {
+		resolve();
+	} else {
+		document.addEventListener('DOMContentLoaded', resolve);
+	}
+});
+
+var optionsReady = new Promise(function optionsReadyPromise(resolve) {
 	chrome.storage.sync.get(Object.keys(Options), function(items) {
 		if (items[STORAGE_ENABLE_EXTENSION] !== false) {
 			var options = {};
@@ -499,7 +466,66 @@ document.addEventListener("DOMContentLoaded", function(event) {
 					options[property] = Options[property];
 				}
 			}
-			main(options);
+			resolve(options);
+		} else {
+			resolve();
 		}
 	});
+});
+
+optionsReady.then(function(options) {
+	if (options === undefined) {
+		return;
+	}
+	// Enforce we load the right page with as much data as possible.
+	if (!options[STORAGE_ENABLE_EXTENSION]) {
+		return;
+	}
+	var params = parseQueryString(location.search.substring(1));
+	var needRefresh = false;
+	var requiredParams = {
+		nv: '',
+		m: '1',  // Primary map
+		o: '1',  // Overview map
+		l: '1',  // Legend
+		d: '1',  // Mobile QR code
+		g: '1',  // GPS coordinates
+	};
+	for (var key in requiredParams) {
+		if (params[key] === undefined ||
+				params[key] !== requiredParams[key]) {
+			params[key] = requiredParams[key];
+			needRefresh = true;
+		}
+	}
+	if (needRefresh) {
+		var queryString = [];
+		for (var key in params) {
+			queryString.push(key + '=' + params[key]);
+		}
+		location.replace(
+				location.origin + location.pathname + '?' + queryString.join('&'));
+		return;
+	}
+	documentReady.then(function() {
+		main(options);
+	});
+});
+
+chrome.storage.onChanged.addListener(function(changes, areaName) {
+	if (areaName !== 'sync') {
+		return;
+	}
+	for (var property in changes) {
+		if (Options[property] === undefined) {
+			continue;
+		}
+		chrome.storage.sync.get(STORAGE_AUTO_REFRESH, function(items) {
+			if (items[STORAGE_AUTO_REFRESH] === false) {
+				return;
+			}
+			location.reload();
+		});
+		break;
+	}
 });

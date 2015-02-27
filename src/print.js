@@ -62,27 +62,26 @@ chrome.storage.onChanged.addListener(function(changes, areaName) {
 });
 
 var main = function(options) {
-	Analytics.recordPageView();
-	
-	// Add custom CSS.
-	var cssLink = document.createElement('link');
-	cssLink.rel = 'stylesheet';
-	cssLink.href = chrome.extension.getURL('res/print.css');
-	document.head.appendChild(cssLink);
-
 	/* Grab all elements that are to be manipulated later. */
 	var bigMap = document.querySelector('.map');
+	var bigMapSrc = bigMap.src;
+	
+	if (options[STORAGE_ADD_MAP] || options[STORAGE_ADD_ZOOM_MAP]) {
+		bigMap.src = '';
+	}
+	
 	var overallCard = document.querySelector('.card');
-	var campaignText = document.querySelector('.campaign');
 	var smallMap = document.querySelector('.overview');
+	var smallMapParent = smallMap.parentElement;
+	
+	smallMap.src = '';
+	
+	var campaignText = document.querySelector('.campaign');
 	var mobileCode = document.querySelector('.directions');
 	var addressTable = document.querySelector('.addresses');
 	
-	var bigMapSrc = bigMap.getAttribute('SRC');
 	var bigMapParent = bigMap.parentElement;
 	var bigMapParentParent = bigMapParent.parentElement;
-	var smallMapParent = smallMap.parentElement;
-	var smallMapParentParent = smallMapParent.parentElement;
 	var firstLegend = smallMapParent.nextSibling;
 	var brElement = smallMapParent.previousSibling;
 	var brElementParent = brElement.parentElement;
@@ -94,10 +93,32 @@ var main = function(options) {
 	}
 	var noteOrInfo = actualTitle.nextSibling;
 	
+	// Remove small map
+	overallCard.removeChild(smallMapParent);
+	
+	// Add custom CSS.
+	var cssLink = document.createElement('link');
+	cssLink.rel = 'stylesheet';
+	cssLink.href = chrome.extension.getURL('res/print.css');
+	document.head.appendChild(cssLink);
+	
+	var parseGeocode = function(geocode) {
+		return [parseFloat(geocode[0]), parseFloat(geocode[1])];
+	}
+	
+	var formatGeocode = function(geocode, precision) {
+		if (precision === undefined) {
+			precision = 6;
+		}
+		return geocode[0].toPrecision(precision) + ',' + 
+					 geocode[1].toPrecision(precision);
+	};
+	
 	var orderedIds = [];
 	var addressData = {};
-	var addressRows = addressTable.querySelectorAll('tr');
-	for (var idx = 0; idx < addressRows.length; ++idx) {
+	var addressRows = addressTable.querySelectorAll('tbody tr');
+	var numAddresses = addressRows.length;
+	for (var idx = 0; idx < numAddresses; ++idx) {
 		var addressRow = addressRows[idx];
 		var addressCells = addressRow.children;
 		
@@ -114,7 +135,7 @@ var main = function(options) {
 		var language = languageField.textContent;
 		var name = nameAndTelephoneField.querySelector('strong').textContent;
 		var telephone = nameAndTelephoneField.querySelector('span').textContent;
-		var address = addressField.childNodes[0].trim();  // Text Node
+		var address = addressField.childNodes[0].textContent.trim();  // Text Node
 		var geocode = addressField.querySelector('span').textContent
 				.replace(/°/g, '').split(' ');
 		var notes = notesField.textContent;
@@ -131,6 +152,51 @@ var main = function(options) {
 		};
 	}
 	
+	var lastGeocode = [null, null];
+	var markerLabelIdx = 0;
+	var markerLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	var NOT_VALID_STATUS = 'Not valid';
+	var avgX = 0, avgY = 0;
+	var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+	for (var idx = 0; idx < numAddresses; ++idx) {
+		var addressInfo = addressData[orderedIds[idx]];
+		
+		var parsed = parseGeocode(addressInfo.geocode);
+		avgX += parsed[0];
+		avgY += parsed[1];
+		minX = Math.min(minX, parsed[0]);
+		minY = Math.min(minY, parsed[1]);
+		maxX = Math.max(maxX, parsed[0]);
+		maxY = Math.max(maxY, parsed[1]);
+		
+		if (status !== NOT_VALID_STATUS &&
+				markerLabelIdx < markerLabels.length &&
+				(addressInfo.geocode[0] !== lastGeocode[0] ||
+				 addressInfo.geocode[1] !== lastGeocode[1])) {
+			addressInfo.label = markerLabels[markerLabelIdx++];
+		}
+		lastGeocode = addressInfo.geocode;
+	}
+	if (numAddresses !== 0) {
+		avgX /= numAddresses;
+		avgY /= numAddresses;
+	}
+	
+	var generateMarkers = function() {
+		var markers = [];
+		for (var idx = 0; idx < numAddresses; ++idx) {
+			var addressInfo = addressData[orderedIds[idx]];
+			if (addressInfo.label !== undefined) {
+				markers.push(
+					'markers=label:' + addressInfo.label + '|' + 
+					formatGeocode(parseGeocode(addressInfo.geocode)));
+			}
+		};
+		markers.push('visible=' + formatGeocode([minX, minY]));
+		markers.push('visible=' + formatGeocode([maxX, maxY]));
+		return markers.join('&');
+	};
+	
 	var newTable = document.createElement('div');
 	var invalidAddressTable = addressTable.cloneNode(true);
 	newTable.appendChild(invalidAddressTable);
@@ -139,7 +205,6 @@ var main = function(options) {
 	newTable.insertBefore(subheading, newTable.firstChild);
 	var VALID_TABLE = 0;
 	var INVALID_TABLE = 1;
-	var NOT_VALID_STATUS = 'Not valid';
 	var addressTables = [addressTable, invalidAddressTable];
 	for (var idx = addressTables.length - 1; idx >= 0; idx--) {
 		var addressTable = addressTables[idx];
@@ -180,6 +245,9 @@ var main = function(options) {
 		var trs = tbody.getElementsByTagName('tr');
 		for (var i = trs.length - 1; i >= 0; --i) {
 			var idField = trs[i].children[0];
+			var id = idField.querySelector('.muted').textContent;
+			var addressInfo = addressData[id];
+			
 			var statusField = trs[i].children[1];
 			var language = trs[i].children[2];
 			var nameAndTelephone = trs[i].children[3];
@@ -203,17 +271,21 @@ var main = function(options) {
 				trs[i].removeChild(nameAndTelephone);
 				trs[i].removeChild(checkboxes);
 			} else {
-				// Remove extra identifier for valid calls.
+				// Remove id and replace label.
 				if (idField.children.length > 1) {
 					idField.removeChild(idField.children[1]);
+					if (addressInfo.label !== undefined) {
+						idField.firstElementChild.innerText = addressInfo.label;
+					} else {
+						idField.removeChild(idField.firstElementChild);
+					}
 				}
 				
 				if (options[STORAGE_REMOVE_NAMES]) {
 					// Remove name.
 					if (nameAndTelephone.children.length >= 2 &&
 							nameAndTelephone.children[0].tagName === 'STRONG') {
-						nameAndTelephone.removeChild(
-								nameAndTelephone.children[0]);
+						nameAndTelephone.removeChild(nameAndTelephone.children[0]);
 					}
 				}
 			}
@@ -325,49 +397,6 @@ var main = function(options) {
 		overallCard.insertBefore(assignmentBox, overallCard.firstChild);
 	}
 	
-	// Parse all markers.
-	var src = bigMapSrc.split('?');
-	src.shift();
-	src = src.join('?');
-	
-	var params = parseQueryString(src);
-	var markers = params.markers;
-	if (typeof markers === 'string') {
-		var vals = markers.split('|');
-		markers = [''];
-		var initial = '';
-		for (var i=0;i<vals.length;i++) {
-			if (vals[i][0] < '1' || vals[i][0] > '9') {
-				initial += vals[i] + '|';
-			} else {
-				markers.push(vals[i]);
-			}
-		}
-		markers[0] = initial;
-	}
-	var avgX = 0, avgY = 0;
-	for (var i=1;i<markers.length;i++) {
-		var vals = markers[i].split('|');
-		var obj = {};
-		obj.original = markers[i];
-		for (var j=0;j<vals.length;j++) {
-			if (vals[j].indexOf(',') !== -1) {
-				var v = vals[j].split(',');
-				obj.x = parseFloat(v[0]);
-				obj.y = parseFloat(v[1]);
-				avgX += obj.x;
-				avgY += obj.y;
-			} else {
-				obj[j] = vals[j];
-			}
-		}
-		markers[i] = obj;
-	}
-	if (markers.length > 1) {
-		avgX /= markers.length - 1;
-		avgY /= markers.length - 1;
-	}
-	
 	if (options[STORAGE_ADD_ZOOM_MAP]) {
 		// Make separate density map but with modified src.
 		var newMap = bigMap.cloneNode(true);
@@ -377,8 +406,9 @@ var main = function(options) {
 		// Cleanup unused fields.
 		mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
-		if (options[STORAGE_REMOVE_MARKERS]) {
-			mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
+		mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
+		if (!options[STORAGE_REMOVE_MARKERS]) {
+			mapSrc += generateMarkers();
 		}
 		mapSrc = mapSrc.replace(
 				'staticmap?',
@@ -398,8 +428,9 @@ var main = function(options) {
 		// Cleanup unused fields.
 		mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
-		if (options[STORAGE_REMOVE_MARKERS]) {
-			mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
+		mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
+		if (!options[STORAGE_REMOVE_MARKERS]) {
+			mapSrc += generateMarkers();
 		}
 		bigMap.setAttribute('SRC', mapSrc);
 
@@ -421,7 +452,7 @@ var main = function(options) {
 		while (next && next.tagName !== 'TABLE') {
 			var toRemove = next;
 			next = next.nextSibling;
-			smallMapParentParent.removeChild(toRemove);
+			overallCard.removeChild(toRemove);
 		}
 		
 		// Add better Chinese legend
@@ -454,9 +485,7 @@ var main = function(options) {
 	// Remove break
 	brElementParent.removeChild(brElement);
 	
-	// Remove small map
-	smallMap.setAttribute('src', '');
-	smallMapParentParent.removeChild(smallMapParent);
+	Analytics.recordPageView();
 };
 
 document.addEventListener("DOMContentLoaded", function(event) {

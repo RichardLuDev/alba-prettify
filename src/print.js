@@ -93,7 +93,43 @@ var main = function(options) {
 		actualTitle = actualTitle.previousSibling;
 	}
 	var noteOrInfo = actualTitle.nextSibling;
-
+	
+	var orderedIds = [];
+	var addressData = {};
+	var addressRows = addressTable.querySelectorAll('tr');
+	for (var idx = 0; idx < addressRows.length; ++idx) {
+		var addressRow = addressRows[idx];
+		var addressCells = addressRow.children;
+		
+		var idField = addressCells[0];
+		var statusField = addressCells[1];
+		var languageField = addressCells[2];
+		var nameAndTelephoneField = addressCells[3];
+		var addressField = addressCells[4];
+		var notesField = addressCells[5];
+		var boxesField = addressCells[6];
+		
+		var id = idField.querySelector('.muted').textContent;
+		var status = statusField.querySelector('.status').textContent;
+		var language = languageField.textContent;
+		var name = nameAndTelephoneField.querySelector('strong').textContent;
+		var telephone = nameAndTelephoneField.querySelector('span').textContent;
+		var address = addressField.childNodes[0].trim();  // Text Node
+		var geocode = addressField.querySelector('span').textContent
+				.replace(/°/g, '').split(' ');
+		var notes = notesField.textContent;
+		
+		orderedIds.push(id);
+		addressData[id] = {
+			status: status,
+			language: language,
+			name: name,
+			telephone: telephone,
+			address: address,
+			geocode: geocode,
+			notes: notes,
+		};
+	}
 	
 	var newTable = document.createElement('div');
 	var invalidAddressTable = addressTable.cloneNode(true);
@@ -101,12 +137,10 @@ var main = function(options) {
 	var subheading = document.createElement('h2');
 	subheading.innerText = 'Not Valid Calls';
 	newTable.insertBefore(subheading, newTable.firstChild);
-
-	var addressTables = [addressTable, invalidAddressTable];
-
 	var VALID_TABLE = 0;
 	var INVALID_TABLE = 1;
 	var NOT_VALID_STATUS = 'Not valid';
+	var addressTables = [addressTable, invalidAddressTable];
 	for (var idx = addressTables.length - 1; idx >= 0; idx--) {
 		var addressTable = addressTables[idx];
 		
@@ -146,7 +180,7 @@ var main = function(options) {
 		var trs = tbody.getElementsByTagName('tr');
 		for (var i = trs.length - 1; i >= 0; --i) {
 			var idField = trs[i].children[0];
-				var statusField = trs[i].children[1];
+			var statusField = trs[i].children[1];
 			var language = trs[i].children[2];
 			var nameAndTelephone = trs[i].children[3];
 			var address = trs[i].children[4];

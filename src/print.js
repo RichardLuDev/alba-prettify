@@ -14,13 +14,25 @@ var parseQueryString = function(queryString) {
 	return params;
 };
 
+// Add custom CSS.
+var loadPrintCss = function() {
+	var cssLink = document.createElement('link');
+	cssLink.rel = 'stylesheet';
+	cssLink.href = chrome.extension.getURL('res/print.css');
+	document.head.appendChild(cssLink);
+}
+
+var removeElement = function(element) {
+	element.parentElement.removeChild(element);
+}
+
 var main = function(options) {
 	/* Grab all elements that are to be manipulated later. */
 	
 	var overallCard = document.querySelector('.card');
 	var actualTitle = overallCard.querySelector('h1');
 	var possibleBadge = actualTitle.querySelector('.badge');
-	if (possibleBadge && possibleBadge.innerText.find('Telephone') !== -1) {
+	if (possibleBadge && possibleBadge.textContent.find('Telephone') !== -1) {
 		// Do no work for telephone territories.
 		return;
 	}
@@ -36,18 +48,11 @@ var main = function(options) {
 	var mobileCode = overallCard.querySelector('.directions');
 	var addressTable = overallCard.querySelector('.addresses');
 	var bigMapParent = bigMap.parentElement;
-	var bigMapParentParent = bigMapParent.parentElement;
 	var firstLegend = mobileCode.nextSibling;
 	var brElement = mobileCode.previousSibling;
 	var brElementParent = brElement.parentElement;
 	var mobileCodeParent = mobileCode.parentElement;
 	var noteOrInfo = actualTitle.nextSibling;
-	
-	// Add custom CSS.
-	var cssLink = document.createElement('link');
-	cssLink.rel = 'stylesheet';
-	cssLink.href = chrome.extension.getURL('res/print.css');
-	document.head.appendChild(cssLink);
 	
 	var parseGeocode = function(geocode) {
 		return [parseFloat(geocode[0]), parseFloat(geocode[1])];
@@ -254,15 +259,15 @@ var main = function(options) {
 		if (idx === INVALID_TABLE) {
 			// Remove all but the status and address columns for invalids.
 			for (var i = headings.length - 1; i >= 0; --i) {
-				if (headings[i].innerText.toLowerCase() === 'name & telephone' &&
+				if (headings[i].textContent.toLowerCase() === 'name & telephone' &&
 						options[STORAGE_ADD_NOT_VALID_NAMES]) {
 					headings[i].innerText = 'NAME';
 					continue;
 				}
-				if (headings[i].innerText.toLowerCase() !== 'language' &&
-						headings[i].innerText.toLowerCase() !== 'address' &&
-						headings[i].innerText.toLowerCase() !== 'notes') {
-					headingRow.removeChild(headings[i]);
+				if (headings[i].textContent.toLowerCase() !== 'language' &&
+						headings[i].textContent.toLowerCase() !== 'address' &&
+						headings[i].textContent.toLowerCase() !== 'notes') {
+					removeElement(headings[i]);
 				}
 			}
 			// Duplicate headings for second row.
@@ -276,7 +281,7 @@ var main = function(options) {
 			if (options[STORAGE_REMOVE_NAMES]) {
 				// Remove 'Name' in 'Name & Telephone'.
 				for (var i = 0; i < headings.length; ++i) {
-					if (headings[i].innerText.toLowerCase() ===
+					if (headings[i].textContent.toLowerCase() ===
 							'name & telephone') {
 						headings[i].innerText = 'TELEPHONE';
 						break;
@@ -299,11 +304,11 @@ var main = function(options) {
 			var notes = trs[i].children[5];
 			var checkboxes = trs[i].children[6];
 			
-			var status = statusField.innerText;
+			var status = statusField.textContent;
 			// Separate rows based on table.
 			if ((idx === INVALID_TABLE && status !== NOT_VALID_STATUS) ||
 					(idx === VALID_TABLE && status === NOT_VALID_STATUS)) {
-				tbody.removeChild(trs[i]);
+				removeElement(trs[i]);
 				continue;
 			}
 
@@ -316,7 +321,7 @@ var main = function(options) {
 				if (options[STORAGE_ADD_NOT_VALID_NAMES]) {
 					if (nameAndTelephone.children.length >= 2 &&
 							nameAndTelephone.children[0].tagName === 'STRONG') {
-						nameAndTelephone.removeChild(nameAndTelephone.children[1]);
+						removeElement(nameAndTelephone.children[1]);
 					}
 					trs[i].children[3].classList.add('border');
 				} else {
@@ -326,31 +331,31 @@ var main = function(options) {
 			} else {
 				// Remove id and replace label.
 				if (idField.children.length > 1) {
-					idField.removeChild(idField.children[1]);
+					removeElement(idField.children[1]);
 					if (addressInfo.label !== undefined) {
 						idField.firstElementChild.innerText = addressInfo.label;
 					} else {
-						idField.removeChild(idField.firstElementChild);
+						removeElement(idField.firstElementChild);
 					}
 				}
 				
 				// Remove contacted.
 				var contactedDate = nameAndTelephone.querySelector('small');
 				if (contactedDate) {
-					nameAndTelephone.removeChild(contactedDate);
+					removeElement(contactedDate);
 				}
 				
 				if (options[STORAGE_REMOVE_NAMES]) {
 					// Remove name.
 					var strongName = nameAndTelephone.querySelector('strong');
 					if (strongName) {
-						nameAndTelephone.removeChild(strongName);
+						removeElement(strongName);
 					}
 				}
 			}
 			
 			// Bold language column.
-			var languageText = language.innerText;
+			var languageText = language.textContent;
 			if (languageText.indexOf('Chinese') !== -1) {
 				// Chinese is redundant for Mandarin and Cantonese.
 				languageText = languageText.split(' ')[1];
@@ -361,7 +366,7 @@ var main = function(options) {
 			if (options[STORAGE_REMOVE_GEOCODE]) {
 				var geocodeSpan = address.querySelector('span');
 				if (geocodeSpan) {
-					address.removeChild(geocodeSpan);
+					removeElement(geocodeSpan);
 				}
 			}
 		}
@@ -382,7 +387,7 @@ var main = function(options) {
 				for (var j = 0; j < nextRow.children.length; ++j) {
 					curRow.appendChild(nextRow.children[j].cloneNode(true));
 				}
-				tbody.removeChild(nextRow);
+				removeElement(nextRow);
 			}
 		// Color changes when street changes
 		} else {
@@ -398,8 +403,8 @@ var main = function(options) {
 			var css_index = 1;
 			for (var i = 0; i < trs.length - 1; ++i) {
 				trs[i].classList.add(CSS_CLASSES[css_index]);
-				var curStreet = getStreetFromAddress(trs[i].children[4].innerText);
-				var nextStreet = getStreetFromAddress(trs[i + 1].children[4].innerText);
+				var curStreet = getStreetFromAddress(trs[i].children[4].textContent);
+				var nextStreet = getStreetFromAddress(trs[i + 1].children[4].textContent);
 				if (curStreet !== nextStreet) {
 					css_index = 1 - css_index;
 				}
@@ -419,15 +424,15 @@ var main = function(options) {
 	if (campaignText) {
 		var campaignTextParent = campaignText.parentElement;
 		overallCard.insertBefore(campaignText, overallCard.firstChild);
-		overallCard.removeChild(campaignTextParent);
+		removeElement(campaignTextParent);
 	}
 	
 	// Remove territory notes
 	if (noteOrInfo.children.length === 1 &&
 			noteOrInfo.children[0].tagName === 'STRONG' &&
-			noteOrInfo.children[0].innerText === 'Notes:') {
+			noteOrInfo.children[0].textContent === 'Notes:') {
 		var info = noteOrInfo.nextSibling;
-		overallCard.removeChild(noteOrInfo);
+		removeElement(noteOrInfo);
 		noteOrInfo = info;
 	}
 	
@@ -438,7 +443,7 @@ var main = function(options) {
 		if (mobileCode.firstElementChild) {
 			mobileCode.firstElementChild.src = '';
 		}
-		mobileCodeParent.removeChild(mobileCode);
+		removeElement(mobileCode);
 	}
 	
 	// Add assignment box with Name and stuff.
@@ -453,13 +458,12 @@ var main = function(options) {
 	var MAX_URL_LENGTH = 2048;
 	
 	if (options[STORAGE_ADD_ZOOM_MAP]) {
-		// Make separate density map but with modified src.
-		var newMap = bigMap.cloneNode(true);
+		var newZoomMap = bigMap.cloneNode(true);
 		// Cleanup unused fields.
-		var mapSrc = bigMapSrc;
+		var mapSrc = bigMapSrc.replace(/\?&/g, '?');
 		mapSrc = mapSrc.replace(
 				'staticmap?',
-				'staticmap?center=' + formatGeocode([avgX, avgY], 5)) + '&zoom=15&';
+				'staticmap?center=' + formatGeocode([avgX, avgY], 5) + '&zoom=15&');
 		mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
@@ -468,17 +472,17 @@ var main = function(options) {
 		if (!options[STORAGE_REMOVE_MARKERS]) {
 			mapSrc += generateMarkers(MAX_URL_LENGTH - mapSrc.length);
 		}
-		newMap.src = mapSrc;
-		bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
+		newZoomMap.src = mapSrc;
+		overallCard.insertBefore(newZoomMap, bigMapParent.nextSibling);
 		
 		var title2 = actualTitle.cloneNode(true);
 		title2.children[1].innerText += ' Zoomed-In';
-		newMap.parentElement.insertBefore(title2, newMap);
+		newZoomMap.parentElement.insertBefore(title2, newZoomMap);
 	}
 	
 	if (options[STORAGE_ADD_MAP]) {
 		// Cleanup unused fields.
-		var mapSrc = bigMapSrc;
+		var mapSrc = bigMapSrc.replace(/\?&/g, '?');
 		mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
@@ -493,13 +497,12 @@ var main = function(options) {
 
 		// Duplicate territory name.
 		var title3 = actualTitle.cloneNode(true);
-		bigMapParentParent.insertBefore(title3, bigMapParent);
+		overallCard.insertBefore(title3, bigMapParent);
 
 		// Move stats to first page.
-		bigMapParentParent.insertBefore(noteOrInfo, bigMapParent);
+		overallCard.insertBefore(noteOrInfo, bigMapParent);
 	} else {
-		// No Big Map
-		bigMapParentParent.removeChild(bigMapParent);
+		removeElement(bigMapParent);
 	}
 	
 	// Remove legend
@@ -508,13 +511,14 @@ var main = function(options) {
 		while (next && next.tagName !== 'TABLE') {
 			var toRemove = next;
 			next = next.nextSibling;
-			overallCard.removeChild(toRemove);
+			removeElement(toRemove);
 		}
 	}
 	
 	// Remove break
-	brElementParent.removeChild(brElement);
+	removeElement(brElement);
 	
+	loadPrintCss();
 	Analytics.recordPageView();
 };
 

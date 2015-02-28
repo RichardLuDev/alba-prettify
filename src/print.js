@@ -1,4 +1,4 @@
-'use strict';
+﻿'use strict';
 
 var parseQueryString = function(queryString) {
 	var params = {};
@@ -16,34 +16,31 @@ var parseQueryString = function(queryString) {
 
 var main = function(options) {
 	/* Grab all elements that are to be manipulated later. */
-	var bigMap = document.querySelector('.map');
-	var bigMapSrc = bigMap.src;
 	
+	var overallCard = document.querySelector('.card');
+	var actualTitle = overallCard.querySelector('h1');
+	var possibleBadge = actualTitle.querySelector('.badge');
+	if (possibleBadge && possibleBadge.innerText.find('Telephone') !== -1) {
+		// Do no work for telephone territories.
+		return;
+	}
+	
+	// Stop map loading ASAP.
+	var bigMap = overallCard.querySelector('.map');
+	var bigMapSrc = bigMap.src;
 	if (options[STORAGE_ADD_MAP] || options[STORAGE_ADD_ZOOM_MAP]) {
 		bigMap.src = '';
 	}
 	
-	var overallCard = document.querySelector('.card');
-	var smallMap = document.querySelector('.overview');
-	var smallMapParent = smallMap.parentElement;
-	
-	smallMap.src = '';
-	
-	var campaignText = document.querySelector('.campaign');
-	var mobileCode = document.querySelector('.directions');
-	var addressTable = document.querySelector('.addresses');
-	
+	var campaignText = overallCard.querySelector('.campaign');
+	var mobileCode = overallCard.querySelector('.directions');
+	var addressTable = overallCard.querySelector('.addresses');
 	var bigMapParent = bigMap.parentElement;
 	var bigMapParentParent = bigMapParent.parentElement;
-	var firstLegend = smallMapParent.nextSibling;
-	var brElement = smallMapParent.previousSibling;
+	var firstLegend = mobileCode.nextSibling;
+	var brElement = mobileCode.previousSibling;
 	var brElementParent = brElement.parentElement;
 	var mobileCodeParent = mobileCode.parentElement;
-	// Accommodate optional territory 'Notes'.
-	var actualTitle = smallMapParent.previousSibling;  
-	while (actualTitle.tagName != 'H1') {
-		actualTitle = actualTitle.previousSibling;
-	}
 	var noteOrInfo = actualTitle.nextSibling;
 	
 	// Add custom CSS.
@@ -63,6 +60,22 @@ var main = function(options) {
 		return geocode[0].toPrecision(precision) + ',' + 
 					 geocode[1].toPrecision(precision);
 	};
+	
+	var getStreetFromAddress = function(address) {
+		// /[,?#\d]* / - Matches the first bits of the street number, enforcing
+		//		ending in space.
+		// /[\d]*[a-zA-Z]+(?!\d)/ - Street names can start with numbers, 1st,
+		//		etc, but must not contain any letters followed by numbers, as
+		//		those are postal codes.
+		// ((?:[\d]*[a-zA-Z]+(?!\d) ?)*) - Capture the full street name,
+		//		possibly repeats with 'St W'.
+		var STREET_ADDRESS = /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/;
+		return STREET_ADDRESS.exec(address)[1];
+	}
+	
+	var randomArrayChoice = function(array) {
+		return array[Math.floor(Math.random() * array.length)];
+	}
 	
 	var orderedIds = [];
 	var addressData = {};
@@ -103,11 +116,14 @@ var main = function(options) {
 	}
 	
 	var lastGeocode = [null, null];
-	var markerLabelIdx = 0;
-	var markerLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+	var lastAddress = null;
+	var DOT = '•';
+	var markerLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' + DOT;
 	var NOT_VALID_STATUS = 'Not valid';
 	var avgX = 0, avgY = 0;
 	var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+	var totalLocations = 0;
+	var potentials = {};
 	for (var idx = 0; idx < numAddresses; ++idx) {
 		var addressInfo = addressData[orderedIds[idx]];
 		
@@ -120,10 +136,16 @@ var main = function(options) {
 		maxY = Math.max(maxY, parsed[1]);
 		
 		if (addressInfo.status !== NOT_VALID_STATUS &&
-				markerLabelIdx < markerLabels.length &&
 				(addressInfo.geocode[0] !== lastGeocode[0] ||
 				 addressInfo.geocode[1] !== lastGeocode[1])) {
-			addressInfo.label = markerLabels[markerLabelIdx++];
+			var address = getStreetFromAddress(addressInfo.address);
+			if (lastAddress !== address) {
+				potentials[address] = [addressInfo];
+				lastAddress = address;
+			} else {
+				potentials[address].push(addressInfo);
+			}
+			totalLocations += 1;
 			lastGeocode = addressInfo.geocode;
 		}
 	}
@@ -132,19 +154,86 @@ var main = function(options) {
 		avgY /= numAddresses;
 	}
 	
-	var generateMarkers = function() {
+	var markersLeft = markerLabels.length;
+	var totalAddresses = Object.keys(potentials).length;
+	if (markersLeft < totalAddresses) {
+		for (var key in potentials) {
+			var addressInfos = potentials[key];
+			if (markersLeft > 0) {
+				addressInfos[0].label = '';
+				markersLeft--;
+			}
+		}
+	} else if (markersLeft >= totalLocations) {
+		for (var key in potentials) {
+			var addressInfos = potentials[key];
+			for (var i = 0; i < addressInfos.length; ++i) {
+				addressInfos[i].label = '';
+			}
+		}
+	} else {
+		var allotted = {};
+		for (var key in potentials) {
+			allotted[key] = 0;
+		}
+		while (markersLeft > 0) {
+			for (var key in potentials) {
+				var addressInfos = potentials[key];
+				if (markersLeft > 0 && allotted[key] < addressInfos.length) {
+					allotted[key] += 1;
+					markersLeft--;
+				}
+			}
+		}
+		// We want to hit the first and last items, if possible.
+		// Given 3 more addresses to pick out of 8, 8/3 ~= 2.66
+		// Ideally we pick 0, 2/3, 4/5, 7.
+		for (var key in potentials) {
+			var addressInfos = potentials[key];
+			var got = allotted[key];
+			var skip = (addressInfos.length - 1) / (got - 1);
+			for (var i = 0; i < addressInfos.length; i += skip) {
+				if (got > 0) {
+					addressInfos[Math.floor(i)].label = '';
+					got--;
+				}
+			}
+		}
+	}
+	var markerLabelIdx = 0;
+	for (var idx = 0; idx < numAddresses; ++idx) {
+		var addressInfo = addressData[orderedIds[idx]];
+		if (addressInfo.label === '') {
+			if (markerLabelIdx < markerLabels.length) {
+				addressInfo.label = markerLabels[markerLabelIdx++];
+			} else {
+				// Theoretically there should be at most one of these.
+				addressInfo.label = DOT;
+			}
+		}
+	}
+	
+	var generateMarkers = function(lengthLimit) {
 		var markers = [];
+		var smallMarkers = [];
 		for (var idx = 0; idx < numAddresses; ++idx) {
 			var addressInfo = addressData[orderedIds[idx]];
 			if (addressInfo.label !== undefined) {
-				markers.push(
-					'markers=label:' + addressInfo.label + '|' + 
-					formatGeocode(parseGeocode(addressInfo.geocode)));
+				if (addressInfo.label === DOT) {
+					smallMarkers.push(formatGeocode(parseGeocode(addressInfo.geocode)));
+				} else {
+					markers.push(
+						'markers=label:' + addressInfo.label + '|' + 
+						formatGeocode(parseGeocode(addressInfo.geocode)));
+				}
 			}
 		};
 		markers.push('visible=' + formatGeocode([minX, minY]));
 		markers.push('visible=' + formatGeocode([maxX, maxY]));
-		return markers.join('&');
+		if (smallMarkers.length > 0) {
+			markers.push('markers=' + smallMarkers.join('|'));
+		}
+		return '&' + markers.join('&');
 	};
 	
 	var newTable = document.createElement('div');
@@ -245,17 +334,17 @@ var main = function(options) {
 					}
 				}
 				
+				// Remove contacted.
+				var contactedDate = nameAndTelephone.querySelector('small');
+				if (contactedDate) {
+					nameAndTelephone.removeChild(contactedDate);
+				}
+				
 				if (options[STORAGE_REMOVE_NAMES]) {
 					// Remove name.
-					if (nameAndTelephone.children.length >= 2 &&
-							nameAndTelephone.children[0].tagName === 'STRONG') {
-						nameAndTelephone.removeChild(nameAndTelephone.children[0]);
-					} else if (nameAndTelephone.children[0].tagName === 'STRIKE') {
-						var strikeElement = nameAndTelephone.children[0];
-						if (strikeElement.children.length >= 2 &&
-								strikeElement.children[0].tagName === 'STRONG') {
-							strikeElement.removeChild(strikeElement.children[0]);
-						}
+					var strongName = nameAndTelephone.querySelector('strong');
+					if (strongName) {
+						nameAndTelephone.removeChild(strongName);
 					}
 				}
 			}
@@ -269,15 +358,10 @@ var main = function(options) {
 			language.innerHTML = '<strong>' + languageText + '</strong>';
 
 			// Remove geocode for both.
-			if (address.children.length >= 1) {
-				if (address.children[0].tagName === 'SPAN') {
-					address.removeChild(address.children[0]);
-				} else if (address.children[0].tagName === 'STRIKE') {
-					var child = address.children[0];
-					if (child.children.length >= 1 &&
-							child.children[0].tagName === 'SPAN') {
-						child.removeChild(child.children[0]);
-					}
+			if (options[STORAGE_REMOVE_GEOCODE]) {
+				var geocodeSpan = address.querySelector('span');
+				if (geocodeSpan) {
+					address.removeChild(geocodeSpan);
 				}
 			}
 		}
@@ -314,10 +398,9 @@ var main = function(options) {
 			var css_index = 1;
 			for (var i = 0; i < trs.length - 1; ++i) {
 				trs[i].classList.add(CSS_CLASSES[css_index]);
-				var curStreet = STREET_ADDRESS.exec(trs[i].children[4].innerText);
-				var nextStreet = STREET_ADDRESS.exec(
-						trs[i + 1].children[4].innerText);
-				if (curStreet[1] !== nextStreet[1]) {
+				var curStreet = getStreetFromAddress(trs[i].children[4].innerText);
+				var nextStreet = getStreetFromAddress(trs[i + 1].children[4].innerText);
+				if (curStreet !== nextStreet) {
 					css_index = 1 - css_index;
 				}
 			}
@@ -367,24 +450,25 @@ var main = function(options) {
 		overallCard.insertBefore(assignmentBox, overallCard.firstChild);
 	}
 	
+	var MAX_URL_LENGTH = 2048;
+	
 	if (options[STORAGE_ADD_ZOOM_MAP]) {
 		// Make separate density map but with modified src.
 		var newMap = bigMap.cloneNode(true);
-		var avgLoc = avgX.toString() + ',' + avgY.toString();
-		
-		var mapSrc = bigMapSrc.replace('color:white', 'color:black');
 		// Cleanup unused fields.
+		var mapSrc = bigMapSrc;
+		mapSrc = mapSrc.replace(
+				'staticmap?',
+				'staticmap?center=' + formatGeocode([avgX, avgY], 5)) + '&zoom=15&';
 		mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
+		mapSrc = mapSrc.replace(/path=[^&]+&?/g, '');
+		mapSrc = mapSrc.replace(/enc:[^&]+&?/g, '');
 		if (!options[STORAGE_REMOVE_MARKERS]) {
-			mapSrc += generateMarkers();
+			mapSrc += generateMarkers(MAX_URL_LENGTH - mapSrc.length);
 		}
-		mapSrc = mapSrc.replace(
-				'staticmap?',
-				'staticmap?center=' + avgLoc) + '&zoom=15';
-
-		newMap.setAttribute('SRC', mapSrc);
+		newMap.src = mapSrc;
 		bigMapParentParent.insertBefore(newMap, bigMapParent.nextSibling);
 		
 		var title2 = actualTitle.cloneNode(true);
@@ -393,16 +477,19 @@ var main = function(options) {
 	}
 	
 	if (options[STORAGE_ADD_MAP]) {
-		// Easier to see small black than small white.
-		var mapSrc = bigMapSrc.replace('color:white', 'color:black');
 		// Cleanup unused fields.
+		var mapSrc = bigMapSrc;
 		mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
 		mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
-		if (!options[STORAGE_REMOVE_MARKERS]) {
-			mapSrc += generateMarkers();
+		if (options[STORAGE_REMOVE_PATH]) {
+			mapSrc = mapSrc.replace(/path=[^&]+&?/g, '');
+			mapSrc = mapSrc.replace(/enc:[^&]+&?/g, '');
 		}
-		bigMap.setAttribute('SRC', mapSrc);
+		if (!options[STORAGE_REMOVE_MARKERS]) {
+			mapSrc += generateMarkers(MAX_URL_LENGTH - mapSrc.length);
+		}
+		bigMap.src = mapSrc;
 
 		// Duplicate territory name.
 		var title3 = actualTitle.cloneNode(true);
@@ -417,7 +504,7 @@ var main = function(options) {
 	
 	// Remove legend
 	if (options[STORAGE_REMOVE_LEGEND]) {
-		var next = smallMapParent.nextSibling;
+		var next = firstLegend;
 		while (next && next.tagName !== 'TABLE') {
 			var toRemove = next;
 			next = next.nextSibling;
@@ -427,9 +514,6 @@ var main = function(options) {
 	
 	// Remove break
 	brElementParent.removeChild(brElement);
-	
-	// Remove small map
-	overallCard.removeChild(smallMapParent);
 	
 	Analytics.recordPageView();
 };
@@ -473,7 +557,7 @@ optionsReady.then(function(options) {
 	var requiredParams = {
 		nv: '',
 		m: '1',  // Primary map
-		o: '1',  // Overview map
+		o: '0',  // Overview map
 		l: '1',  // Legend
 		d: '1',  // Mobile QR code
 		g: '1',  // GPS coordinates

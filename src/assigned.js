@@ -26,7 +26,7 @@ var checkPrintButtons = (function check() {
 				printAnchor.href = buttonGroup.querySelector('a.cmd-print').rel;
 				printAnchor.innerHTML = '<i class="icon-print"></i>';
 				printAnchor.target = '_blank';
-				printAnchor.title = 'Added by Alba Prettify';
+				printAnchor.title = ADDED_BY;
 				buttonGroup.insertBefore(printAnchor, buttonGroup.firstChild);
 			}
 		}

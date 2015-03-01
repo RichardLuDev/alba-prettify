@@ -12,6 +12,8 @@ Extension.isDevMode = function() {
   return !('update_url' in chrome.runtime.getManifest());
 };
 
+var ADDED_BY = 'Added by Alba Prettify';
+
 // Storage keys, using variables as typos become errors.
 var STORAGE_VERSION = 'version';
 var STORAGE_ENABLE_EXTENSION = 'enable-extension';

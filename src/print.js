@@ -245,7 +245,7 @@ var main = function(options) {
 	var invalidAddressTable = addressTable.cloneNode(true);
 	newTable.appendChild(invalidAddressTable);
 	var subheading = document.createElement('h2');
-	subheading.innerText = 'Not Valid Calls';
+	subheading.textContent = 'Not Valid Calls';
 	newTable.insertBefore(subheading, newTable.firstChild);
 	var VALID_TABLE = 0;
 	var INVALID_TABLE = 1;
@@ -261,7 +261,7 @@ var main = function(options) {
 			for (var i = headings.length - 1; i >= 0; --i) {
 				if (headings[i].textContent.toLowerCase() === 'name & telephone' &&
 						options[STORAGE_ADD_NOT_VALID_NAMES]) {
-					headings[i].innerText = 'NAME';
+					headings[i].textContent = 'NAME';
 					continue;
 				}
 				if (headings[i].textContent.toLowerCase() !== 'language' &&
@@ -283,7 +283,7 @@ var main = function(options) {
 				for (var i = 0; i < headings.length; ++i) {
 					if (headings[i].textContent.toLowerCase() ===
 							'name & telephone') {
-						headings[i].innerText = 'TELEPHONE';
+						headings[i].textContent = 'TELEPHONE';
 						break;
 					}
 				}
@@ -333,7 +333,7 @@ var main = function(options) {
 				if (idField.children.length > 1) {
 					removeElement(idField.children[1]);
 					if (addressInfo.label !== undefined) {
-						idField.firstElementChild.innerText = addressInfo.label;
+						idField.firstElementChild.textContent = addressInfo.label;
 					} else {
 						removeElement(idField.firstElementChild);
 					}
@@ -476,7 +476,7 @@ var main = function(options) {
 		overallCard.insertBefore(newZoomMap, bigMapParent.nextSibling);
 		
 		var title2 = actualTitle.cloneNode(true);
-		title2.children[1].innerText += ' Zoomed-In';
+		title2.children[1].textContent += ' Zoomed-In';
 		newZoomMap.parentElement.insertBefore(title2, newZoomMap);
 	}
 	

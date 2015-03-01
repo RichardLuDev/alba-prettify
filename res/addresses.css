@@ -1,0 +1,11 @@
+#alba-prettify-diff .added {
+	background-color: #CCFF99;
+}
+
+#alba-prettify-diff .removed {
+	background-color: #FFCCCC;
+}
+
+#alba-prettify-diff .changed {
+	background-color: #FFFFCC;
+}

@@ -559,7 +559,7 @@ optionsReady.then(function(options) {
 	var params = parseQueryString(location.search.substring(1));
 	var needRefresh = false;
 	var requiredParams = {
-		nv: '',
+		nv: '',  // Show all non-valid calls
 		m: '1',  // Primary map
 		o: '0',  // Overview map
 		l: '1',  // Legend

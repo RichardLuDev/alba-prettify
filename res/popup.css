@@ -9,3 +9,8 @@ input {
 #help-link {
 	float: right;
 }
+
+#reset-default {
+	font-size: 100%;
+	float: right;
+}

@@ -3,6 +3,20 @@
 var ADDRESSES = 'addresses';
 var SAVE_ID = 'alba-prettify-export-save';
 
+var numToString = function(number, digits) {
+	var string = number.toString();
+	if (digits !== undefined && digits > string.length) {
+		string = Array(digits - string.length + 1).join('0') + string;
+	}
+	return string;
+};
+
+var formatDate = function(date) {
+	return [date.getFullYear(),
+					numToString(date.getMonth() + 1, 2),
+					numToString(date.getDate(), 2)].join('-');
+};
+
 document.querySelector('.cmd-export').addEventListener('click', function() {
 	var saveElement = document.getElementById(SAVE_ID);
 	if (saveElement === null) {
@@ -19,9 +33,7 @@ document.querySelector('.cmd-export').addEventListener('click', function() {
 			var text = document.querySelector('#export').textContent;
 			var blob = new Blob([text], {type: 'text/plain'});
 			var date = new Date();
-			var name = (
-					date.toISOString().replace(/T.*$/, '') + ' ' +
-					'Alba Backup.txt');
+			var name = formatDate(date) + ' ' + 'Alba Backup.txt';
 			var link = document.createElement('a');
 			link.download = name;
 			link.href = window.URL.createObjectURL(blob);

@@ -1,19 +1,5 @@
 ﻿'use strict';
 
-var parseQueryString = function(queryString) {
-  var params = {};
-  var queries = queryString.split("&");
-  for (var i = 0; i < queries.length; i++ ) {
-    var temp = queries[i].split('=');
-    if (temp.length === 1) {
-      params[temp[0]] = '';
-    } else {
-      params[temp[0]] = temp[1];
-    }
-  }
-  return params;
-};
-
 // Add custom CSS.
 var loadPrintCss = function() {
   var cssLink = document.createElement('link');
@@ -22,7 +8,7 @@ var loadPrintCss = function() {
   document.head.appendChild(cssLink);
 }
 
-var main = function(options) {
+var main = function(options, queryParams) {
   /* Grab all elements that are to be manipulated later. */
   
   var overallCard = document.querySelector('.card');
@@ -40,7 +26,6 @@ var main = function(options) {
     bigMap.src = '';
   }
   
-  var campaignText = overallCard.querySelector('.campaign');
   var mobileCode = overallCard.querySelector('.directions');
   var addressTable = overallCard.querySelector('.addresses');
   var bigMapParent = bigMap.parentElement;
@@ -405,8 +390,9 @@ var main = function(options) {
     overallCard.appendChild(newTable);
   }
   
-  // Fix campaign text.
-  if (campaignText) {
+  // Move campaign text out of its wrapper.
+  var campaignText = overallCard.querySelector('.campaign');
+  if (campaignText && campaignText.parentElement !== overallCard) {
     var campaignTextParent = campaignText.parentElement;
     overallCard.insertBefore(campaignText, overallCard.firstChild);
     Util.removeElement(campaignTextParent);
@@ -537,10 +523,7 @@ optionsReady.then(function(options) {
     return;
   }
   // Enforce we load the right page with as much data as possible.
-  if (!options[STORAGE_ENABLE_EXTENSION]) {
-    return;
-  }
-  var params = parseQueryString(location.search.substring(1));
+  var params = Util.parseQueryString(location.search.substring(1));
   var needRefresh = false;
   var requiredParams = {
     nv: '',  // Show all non-valid calls
@@ -567,24 +550,26 @@ optionsReady.then(function(options) {
     return;
   }
   documentReady.then(function() {
-    main(options);
+    main(options, params);
   });
 });
 
-chrome.storage.onChanged.addListener(function(changes, areaName) {
-  if (areaName !== 'sync') {
-    return;
-  }
-  for (var property in changes) {
-    if (Options[property] === undefined) {
-      continue;
+documentReady.then(function() {
+  chrome.storage.onChanged.addListener(function(changes, areaName) {
+    if (areaName !== 'sync') {
+      return;
     }
-    chrome.storage.sync.get(STORAGE_AUTO_REFRESH, function(items) {
-      if (items[STORAGE_AUTO_REFRESH] === false) {
-        return;
+    for (var property in changes) {
+      if (Options[property] === undefined) {
+        continue;
       }
-      location.reload();
-    });
-    break;
-  }
+      chrome.storage.sync.get(STORAGE_AUTO_REFRESH, function(items) {
+        if (items[STORAGE_AUTO_REFRESH] === false) {
+          return;
+        }
+        location.reload();
+      });
+      break;
+    }
+  });
 });

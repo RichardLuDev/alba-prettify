@@ -13,6 +13,20 @@ var Util = (function() {
       return /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/.exec(address)[1].trim();
     },
     
+    parseQueryString: function(queryString) {
+      var params = {};
+      var queries = queryString.split("&");
+      for (var i = 0; i < queries.length; i++ ) {
+        var temp = queries[i].split('=');
+        if (temp.length === 1) {
+          params[temp[0]] = '';
+        } else {
+          params[temp[0]] = temp[1];
+        }
+      }
+      return params;
+    },
+    
     removeElement: function(element) {
       // Using parentNode instead of parentElement it covers the document case
       // as well.

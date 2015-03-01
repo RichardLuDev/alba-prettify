@@ -32,7 +32,7 @@ var main = function(options) {
 	var overallCard = document.querySelector('.card');
 	var actualTitle = overallCard.querySelector('h1');
 	var possibleBadge = actualTitle.querySelector('.badge');
-	if (possibleBadge && possibleBadge.textContent.find('Telephone') !== -1) {
+	if (possibleBadge && possibleBadge.textContent.search('Telephone') !== -1) {
 		// Do no work for telephone territories.
 		return;
 	}

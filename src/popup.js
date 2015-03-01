@@ -7,7 +7,7 @@ Analytics.recordEvent(POPUP, 'open');
 // Add version number to subject of feedback email.
 (function() {
 	var feedbackLink = document.getElementById('feedback-link');
-	feedbackLink.href += '?subject=v' + Extension.getVersion() + ' Feedback: [topic]';
+	feedbackLink.href += '?subject=v' + Extension.getVersion() + ' Feedback';
 })();
 
 // Difference between default and user selected is in whether the value is

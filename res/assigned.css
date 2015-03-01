@@ -1,12 +1,12 @@
 a.alba-prettify-print-shortcut-link {
-	-webkit-appearance: button;
+  -webkit-appearance: button;
   padding: 1px 6px;
-	line-height: 20px;
-	text-align: center;
-	vertical-align: middle;
-	font-size: 12px;
-	display: inline-block;
-	margin-bottom: 0;
-	color: buttontext;
+  line-height: 20px;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 12px;
+  display: inline-block;
+  margin-bottom: 0;
+  color: buttontext;
   border: 2px outset buttonface;
 }

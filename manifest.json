@@ -1,75 +1,75 @@
 {
-	"manifest_version": 2,
+  "manifest_version": 2,
 
-	"name": "Alba Prettify",
-	"description": "This extension improves Alba's territory printing page.",
-	"version": "0.12.0",
+  "name": "Alba Prettify",
+  "description": "This extension improves Alba's territory printing page.",
+  "version": "0.12.0",
 
-	"icons": {
-		"16": "res/icon16.png",
-		"48": "res/icon48.png",
-		"128": "res/icon128.png"
-	},
+  "icons": {
+    "16": "res/icon16.png",
+    "48": "res/icon48.png",
+    "128": "res/icon128.png"
+  },
 
-	"permissions": [
-		"declarativeContent",
-		"storage",
-		"http://www.baseloc.com/"
-	],
-	
-	"content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",
-	
-	"web_accessible_resources": [
-		"res/print.css"
-	],
-	
-	"background": {
-		"scripts": [
-			"src/common.js",
-			"src/background.js"
-		]
-	},
-	
-	"page_action": {
-		"default_icon": {
-			"19": "res/icon19.png",
-			"38": "res/icon38.png"
-		},
-		"default_title": "Alba Prettify Options",
-		"default_popup": "src/popup.html"
-	},
+  "permissions": [
+    "declarativeContent",
+    "storage",
+    "http://www.baseloc.com/"
+  ],
+  
+  "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",
+  
+  "web_accessible_resources": [
+    "res/print.css"
+  ],
+  
+  "background": {
+    "scripts": [
+      "src/common.js",
+      "src/background.js"
+    ]
+  },
+  
+  "page_action": {
+    "default_icon": {
+      "19": "res/icon19.png",
+      "38": "res/icon38.png"
+    },
+    "default_title": "Alba Prettify Options",
+    "default_popup": "src/popup.html"
+  },
 
-	"content_scripts": [{
-		"matches": [
-			"http://www.baseloc.com/alba/print/*"
-		],
-		"js": [
-			"src/common.js",
-			"src/print.js"
-		],
-		"run_at": "document_start"
-	}, {
-		"matches": [
-			"http://www.baseloc.com/alba/addresses*"
-		],
-		"css": [
-			"res/addresses.css"
-		],
-		"js": [
-			"src/common.js",
-			"src/addresses.js"
-		],
-		"run_at": "document_end"
-	}, {
-		"matches": [
-			"http://www.baseloc.com/alba/assigned*"
-		],
-		"css": [
-			"res/assigned.css"
-		],
-		"js": [
-			"src/common.js",
-			"src/assigned.js"
-		]
-	}]
+  "content_scripts": [{
+    "matches": [
+      "http://www.baseloc.com/alba/print/*"
+    ],
+    "js": [
+      "src/common.js",
+      "src/print.js"
+    ],
+    "run_at": "document_start"
+  }, {
+    "matches": [
+      "http://www.baseloc.com/alba/addresses*"
+    ],
+    "css": [
+      "res/addresses.css"
+    ],
+    "js": [
+      "src/common.js",
+      "src/addresses.js"
+    ],
+    "run_at": "document_end"
+  }, {
+    "matches": [
+      "http://www.baseloc.com/alba/assigned*"
+    ],
+    "css": [
+      "res/assigned.css"
+    ],
+    "js": [
+      "src/common.js",
+      "src/assigned.js"
+    ]
+  }]
 }

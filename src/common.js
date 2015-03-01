@@ -6,7 +6,7 @@ var DEBUG_ANALYTICS = false;
 // Extension property shortcuts
 var Extension = {};
 Extension.getVersion = function() {
-	return chrome.runtime.getManifest().version;
+  return chrome.runtime.getManifest().version;
 };
 Extension.isDevMode = function() {
   return !('update_url' in chrome.runtime.getManifest());
@@ -47,30 +47,30 @@ Options[STORAGE_ADD_NOT_VALID_NAMES] = false;
 // Analytics reporting functions
 var Analytics = {};
 Analytics.recordEvent = function(category, action, label, value) {
-	chrome.runtime.sendMessage({
-		type: 'analytics',
-		object: {
-			hitType: 'event',
-			eventCategory: category,
-			eventAction: action,
-			eventLabel: label,
-			eventValue: value,
-		},
-	});
+  chrome.runtime.sendMessage({
+    type: 'analytics',
+    object: {
+      hitType: 'event',
+      eventCategory: category,
+      eventAction: action,
+      eventLabel: label,
+      eventValue: value,
+    },
+  });
 };
 Analytics.recordPageView = function(page, title) {
-	if (page === undefined) {
-		page = location.pathname + location.search + location.hash;
-	}
-	if (title === undefined) {
-		title = document.title;
-	}
-	chrome.runtime.sendMessage({
-		type: 'analytics',
-		object: {
-			hitType: 'pageview',
-			page: page,
-			title: title,
-		},
-	});
+  if (page === undefined) {
+    page = location.pathname + location.search + location.hash;
+  }
+  if (title === undefined) {
+    title = document.title;
+  }
+  chrome.runtime.sendMessage({
+    type: 'analytics',
+    object: {
+      hitType: 'pageview',
+      page: page,
+      title: title,
+    },
+  });
 };

@@ -1,78 +1,78 @@
 @page {
-	margin: 0.25in;
+  margin: 0.25in;
 }
 
 @media screen {
-	div > img.map {
-		padding-bottom: 0.5in;
-		border-bottom: 4pt solid #ddd;
-	}
+  div > img.map {
+    padding-bottom: 0.5in;
+    border-bottom: 4pt solid #ddd;
+  }
 
-	div.card {
-		margin: 0.25in;
-		max-width: 8in;
-	}
+  div.card {
+    margin: 0.25in;
+    max-width: 8in;
+  }
 }
 
 @media print {
-	.screen-only {
-		display: none;
-	}
+  .screen-only {
+    display: none;
+  }
 }
 
 body div.card {
-	border: none;
+  border: none;
 }
 
 div.card > h1 {
-	margin: 0 0 6px 0;
+  margin: 0 0 6px 0;
 }
 
 div.card > div.right-corner {
-	float: none;
-	margin-left: 0;
-	margin-bottom: 0;
+  float: none;
+  margin-left: 0;
+  margin-bottom: 0;
 }
 
 div > img.map {
-	height: auto;
-	width: 100%;
-	page-break-after: always;
+  height: auto;
+  width: 100%;
+  page-break-after: always;
 }
 
 a.directions {
-	margin: 0 4px;
+  margin: 0 4px;
 }
 
 div.assignment-box {
-	border: 1px solid black;
-	width: 325px;
-	padding: 10px;
-	margin-bottom: 10px;
-	float: right;
+  border: 1px solid black;
+  width: 325px;
+  padding: 10px;
+  margin-bottom: 10px;
+  float: right;
 }
 
 span.assignment-box-separator {
-	display: inline-block;
-	width: 100px;
+  display: inline-block;
+  width: 100px;
 }
 
 table.addresses {
-	margin-top: 4pt;
+  margin-top: 4pt;
 }
 
 table.addresses.invalid .border {
-	border-right: 2px solid #ddd;
+  border-right: 2px solid #ddd;
 }
 
 table.addresses tr td {
-	-webkit-print-color-adjust: exact;
+  -webkit-print-color-adjust: exact;
 }
 
 table.addresses tr.light td {
-	background-color: #fff;
+  background-color: #fff;
 }
 
 table.addresses tr.dark td {
-	background-color: #f9f9f9;
+  background-color: #f9f9f9;
 }

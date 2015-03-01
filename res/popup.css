@@ -1,16 +1,16 @@
 div.wrapper {
-	width: 215px;
+  width: 215px;
 }
 
 input {
-	vertical-align: text-top;
+  vertical-align: text-top;
 }
 
 #help-link {
-	float: right;
+  float: right;
 }
 
 #reset-default {
-	font-size: 100%;
-	float: right;
+  font-size: 100%;
+  float: right;
 }

@@ -1,5 +1,5 @@
 var Util = (function() {
-  return Object.freeze({
+  var self = Object.freeze({
     getStreetFromAddress: function(address) {
       // /[,?#\d]* / - Matches the first bits of the street number, enforcing
       //    ending in space.
@@ -18,5 +18,16 @@ var Util = (function() {
       // as well.
       return element.parentNode.removeChild(element);
     },
+    
+    removeElements: function(elements) {
+      for (var i = 0; i < elements.length; ++i) {
+        self.removeElement(elements[i]);
+      }
+    },
+    
+    insertAfter: function(element, reference) {
+      return reference.parentNode.insertBefore(element, reference.nextSibling);
+    },
   });
+  return self;
 })();

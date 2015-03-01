@@ -58,7 +58,7 @@ span.assignment-box-separator {
 }
 
 table.addresses {
-  margin-top: 4pt;
+  margin-top: 0;
 }
 
 table.addresses.invalid .border {

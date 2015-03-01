@@ -22,15 +22,11 @@ var loadPrintCss = function() {
   document.head.appendChild(cssLink);
 }
 
-var Util.removeElement = function(element) {
-  element.parentElement.removeChild(element);
-}
-
 var main = function(options) {
   /* Grab all elements that are to be manipulated later. */
   
   var overallCard = document.querySelector('.card');
-  var actualTitle = overallCard.querySelector('h1');
+  var actualTitle = document.querySelector('.card > h1');
   var possibleBadge = actualTitle.querySelector('.badge');
   if (possibleBadge && possibleBadge.textContent.search('Telephone') !== -1) {
     // Do no work for telephone territories.
@@ -49,8 +45,7 @@ var main = function(options) {
   var addressTable = overallCard.querySelector('.addresses');
   var bigMapParent = bigMap.parentElement;
   var firstLegend = mobileCode.nextSibling;
-  var brElement = mobileCode.previousSibling;
-  var brElementParent = brElement.parentElement;
+  var brElements = document.querySelectorAll('.card > br');
   var mobileCodeParent = mobileCode.parentElement;
   var noteOrInfo = actualTitle.nextSibling;
   
@@ -436,6 +431,19 @@ var main = function(options) {
     Util.removeElement(mobileCode);
   }
   
+  // Remove legend
+  if (options[STORAGE_REMOVE_LEGEND]) {
+    var next = firstLegend;
+    while (next && next.tagName !== 'TABLE') {
+      var toRemove = next;
+      next = next.nextSibling;
+      Util.removeElement(toRemove);
+    }
+  }
+  
+  // Remove break
+  Util.removeElements(brElements);
+  
   // Add assignment box with Name and stuff.
   if (options[STORAGE_ADD_ASSIGNMENT_BOX]) {
     var assignmentBox = document.createElement('DIV');
@@ -446,6 +454,10 @@ var main = function(options) {
   }
   
   var MAX_URL_LENGTH = 2048;
+
+  // Move stats to first page.
+  overallCard.insertBefore(actualTitle, bigMapParent);
+  overallCard.insertBefore(noteOrInfo, bigMapParent);
   
   if (options[STORAGE_ADD_ZOOM_MAP]) {
     var newZoomMap = bigMap.cloneNode(true);
@@ -463,11 +475,13 @@ var main = function(options) {
       mapSrc += generateMarkers(MAX_URL_LENGTH - mapSrc.length);
     }
     newZoomMap.src = mapSrc;
-    overallCard.insertBefore(newZoomMap, bigMapParent.nextSibling);
+    Util.insertAfter(newZoomMap, bigMapParent);
     
-    var title2 = actualTitle.cloneNode(true);
-    title2.children[1].textContent += ' Zoomed-In';
-    newZoomMap.parentElement.insertBefore(title2, newZoomMap);
+    if (options[STORAGE_ADD_MAP]) {
+      var title2 = actualTitle.cloneNode(true);
+      title2.children[1].textContent += ' Zoomed-In';
+      overallCard.insertBefore(title2, newZoomMap);
+    }
   }
   
   if (options[STORAGE_ADD_MAP]) {
@@ -484,29 +498,9 @@ var main = function(options) {
       mapSrc += generateMarkers(MAX_URL_LENGTH - mapSrc.length);
     }
     bigMap.src = mapSrc;
-
-    // Duplicate territory name.
-    var title3 = actualTitle.cloneNode(true);
-    overallCard.insertBefore(title3, bigMapParent);
-
-    // Move stats to first page.
-    overallCard.insertBefore(noteOrInfo, bigMapParent);
   } else {
     Util.removeElement(bigMapParent);
   }
-  
-  // Remove legend
-  if (options[STORAGE_REMOVE_LEGEND]) {
-    var next = firstLegend;
-    while (next && next.tagName !== 'TABLE') {
-      var toRemove = next;
-      next = next.nextSibling;
-      Util.removeElement(toRemove);
-    }
-  }
-  
-  // Remove break
-  Util.removeElement(brElement);
   
   loadPrintCss();
   Analytics.recordPageView();

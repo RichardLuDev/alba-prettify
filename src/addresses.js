@@ -89,7 +89,7 @@ var addFileInputs = function() {
       exportBox.parentElement.insertBefore(diffElement, exportBox);
     } else {
       while (diffElement.firstChild) {
-        diffElement.removeChild(diffElement.firstChild);
+        Util.removeElement(diffElement.firstChild);
       }
     }
     var printElements = function(className, from, to) {

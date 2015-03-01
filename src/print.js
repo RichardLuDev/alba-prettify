@@ -22,22 +22,8 @@ var loadPrintCss = function() {
   document.head.appendChild(cssLink);
 }
 
-var removeElement = function(element) {
+var Util.removeElement = function(element) {
   element.parentElement.removeChild(element);
-}
-  
-var getStreetFromAddress = function(address) {
-  // /[,?#\d]* / - Matches the first bits of the street number, enforcing
-  //    ending in space.
-  // /[\d]*[a-zA-Z]+(?!\d)/ - Street names can start with numbers, 1st,
-  //    etc, but must not contain any letters followed by numbers, as
-  //    those are postal codes.
-  // ((?:[\d]*[a-zA-Z]+(?!\d) ?)*) - Capture the full street name,
-  //    which can start with any numbers (132nd) but cannot contain numbers in
-  //    the middle or end, must have at least one letter (excludes US postal
-  //    code), and possibly repeats with 'St W'.
-  var STREET_ADDRESS = /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/;
-  return STREET_ADDRESS.exec(address)[1].trim();
 }
 
 var main = function(options) {
@@ -145,7 +131,7 @@ var main = function(options) {
     if (addressInfo.status !== NOT_VALID_STATUS &&
         (addressInfo.geocode[0] !== lastGeocode[0] ||
          addressInfo.geocode[1] !== lastGeocode[1])) {
-      var address = getStreetFromAddress(addressInfo.address);
+      var address = Util.getStreetFromAddress(addressInfo.address);
       if (lastAddress !== address) {
         potentials[address] = [addressInfo];
         lastAddress = address;
@@ -269,7 +255,7 @@ var main = function(options) {
         if (headings[i].textContent.toLowerCase() !== 'language' &&
             headings[i].textContent.toLowerCase() !== 'address' &&
             headings[i].textContent.toLowerCase() !== 'notes') {
-          removeElement(headings[i]);
+          Util.removeElement(headings[i]);
         }
       }
       // Duplicate headings for second row.
@@ -310,48 +296,48 @@ var main = function(options) {
       // Separate rows based on table.
       if ((idx === INVALID_TABLE && status !== NOT_VALID_STATUS) ||
           (idx === VALID_TABLE && status === NOT_VALID_STATUS)) {
-        removeElement(trs[i]);
+        Util.removeElement(trs[i]);
         continue;
       }
 
       // Remove content.
       if (idx === INVALID_TABLE) {
         // Only keep language, address, and notes for invalid calls.
-        trs[i].removeChild(idField);
-        trs[i].removeChild(statusField);
-        trs[i].removeChild(checkboxes);
+        Util.removeElement(idField);
+        Util.removeElement(statusField);
+        Util.removeElement(checkboxes);
         if (options[STORAGE_ADD_NOT_VALID_NAMES]) {
           if (nameAndTelephone.children.length >= 2 &&
               nameAndTelephone.children[0].tagName === 'STRONG') {
-            removeElement(nameAndTelephone.children[1]);
+            Util.removeElement(nameAndTelephone.children[1]);
           }
           trs[i].children[3].classList.add('border');
         } else {
-          trs[i].removeChild(nameAndTelephone);
+          Util.removeElement(nameAndTelephone);
           trs[i].children[2].classList.add('border');
         }
       } else {
         // Remove id and replace label.
         if (idField.children.length > 1) {
-          removeElement(idField.children[1]);
+          Util.removeElement(idField.children[1]);
           if (addressInfo.label !== undefined) {
             idField.firstElementChild.textContent = addressInfo.label;
           } else {
-            removeElement(idField.firstElementChild);
+            Util.removeElement(idField.firstElementChild);
           }
         }
         
         // Remove contacted.
         var contactedDate = nameAndTelephone.querySelector('small');
         if (contactedDate) {
-          removeElement(contactedDate);
+          Util.removeElement(contactedDate);
         }
         
         if (options[STORAGE_REMOVE_NAMES]) {
           // Remove name.
           var strongName = nameAndTelephone.querySelector('strong');
           if (strongName) {
-            removeElement(strongName);
+            Util.removeElement(strongName);
           }
         }
       }
@@ -368,7 +354,7 @@ var main = function(options) {
       if (options[STORAGE_REMOVE_GEOCODE]) {
         var geocodeSpan = address.querySelector('span');
         if (geocodeSpan) {
-          removeElement(geocodeSpan);
+          Util.removeElement(geocodeSpan);
         }
       }
     }
@@ -389,7 +375,7 @@ var main = function(options) {
         for (var j = 0; j < nextRow.children.length; ++j) {
           curRow.appendChild(nextRow.children[j].cloneNode(true));
         }
-        removeElement(nextRow);
+        Util.removeElement(nextRow);
       }
     // Color changes when street changes
     } else {
@@ -405,8 +391,10 @@ var main = function(options) {
       var css_index = 1;
       for (var i = 0; i < trs.length - 1; ++i) {
         trs[i].classList.add(CSS_CLASSES[css_index]);
-        var curStreet = getStreetFromAddress(trs[i].children[4].textContent);
-        var nextStreet = getStreetFromAddress(trs[i + 1].children[4].textContent);
+        var curStreet = Util.getStreetFromAddress(
+            trs[i].children[4].textContent);
+        var nextStreet = Util.getStreetFromAddress(
+            trs[i + 1].children[4].textContent);
         if (curStreet !== nextStreet) {
           css_index = 1 - css_index;
         }
@@ -426,7 +414,7 @@ var main = function(options) {
   if (campaignText) {
     var campaignTextParent = campaignText.parentElement;
     overallCard.insertBefore(campaignText, overallCard.firstChild);
-    removeElement(campaignTextParent);
+    Util.removeElement(campaignTextParent);
   }
   
   // Remove territory notes
@@ -434,7 +422,7 @@ var main = function(options) {
       noteOrInfo.children[0].tagName === 'STRONG' &&
       noteOrInfo.children[0].textContent === 'Notes:') {
     var info = noteOrInfo.nextSibling;
-    removeElement(noteOrInfo);
+    Util.removeElement(noteOrInfo);
     noteOrInfo = info;
   }
   
@@ -445,7 +433,7 @@ var main = function(options) {
     if (mobileCode.firstElementChild) {
       mobileCode.firstElementChild.src = '';
     }
-    removeElement(mobileCode);
+    Util.removeElement(mobileCode);
   }
   
   // Add assignment box with Name and stuff.
@@ -504,7 +492,7 @@ var main = function(options) {
     // Move stats to first page.
     overallCard.insertBefore(noteOrInfo, bigMapParent);
   } else {
-    removeElement(bigMapParent);
+    Util.removeElement(bigMapParent);
   }
   
   // Remove legend
@@ -513,12 +501,12 @@ var main = function(options) {
     while (next && next.tagName !== 'TABLE') {
       var toRemove = next;
       next = next.nextSibling;
-      removeElement(toRemove);
+      Util.removeElement(toRemove);
     }
   }
   
   // Remove break
-  removeElement(brElement);
+  Util.removeElement(brElement);
   
   loadPrintCss();
   Analytics.recordPageView();

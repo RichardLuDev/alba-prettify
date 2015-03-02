@@ -42,8 +42,8 @@ var main = function(options, queryParams) {
     if (precision === undefined) {
       precision = 6;
     }
-    return geocode[0].toPrecision(precision) + ',' + 
-           geocode[1].toPrecision(precision);
+    return [geocode[0].toPrecision(precision),
+            geocode[1].toPrecision(precision)];
   };
   
   var randomArrayChoice = function(array) {
@@ -75,6 +75,9 @@ var main = function(options, queryParams) {
     var geocode = addressField.querySelector('span').textContent
         .replace(/°/g, '').split(' ');
     var notes = notesField.textContent;
+    
+    geocode = parseGeocode(geocode);
+    geocode = formatGeocode(geocode);
     
     orderedIds.push(id);
     addressData[id] = {
@@ -174,6 +177,8 @@ var main = function(options, queryParams) {
     }
   }
   var markerLabelIdx = 0;
+  lastGeocode = [null, null];
+  var lastLabel = null;
   for (var idx = 0; idx < numAddresses; ++idx) {
     var addressInfo = addressData[orderedIds[idx]];
     if (addressInfo.label === '') {
@@ -182,6 +187,13 @@ var main = function(options, queryParams) {
       } else {
         // Theoretically there should be at most one of these.
         addressInfo.label = DOT;
+      }
+      lastGeocode = addressInfo.geocode;
+      lastLabel = addressInfo.label;
+    } else {
+      if (addressInfo.geocode[0] === lastGeocode[0] &&
+          addressInfo.geocode[1] === lastGeocode[1]) {
+        addressInfo.label = lastLabel;
       }
     }
   }
@@ -193,16 +205,16 @@ var main = function(options, queryParams) {
       var addressInfo = addressData[orderedIds[idx]];
       if (addressInfo.label !== undefined) {
         if (addressInfo.label === DOT) {
-          smallMarkers.push(formatGeocode(parseGeocode(addressInfo.geocode)));
+          smallMarkers.push(addressInfo.geocode.join(','));
         } else {
           markers.push(
             'markers=label:' + addressInfo.label + '|' + 
-            formatGeocode(parseGeocode(addressInfo.geocode)));
+            addressInfo.geocode.join(','));
         }
       }
     };
-    markers.push('visible=' + formatGeocode([minX, minY]));
-    markers.push('visible=' + formatGeocode([maxX, maxY]));
+    markers.push('visible=' + formatGeocode([minX, minY]).join(','));
+    markers.push('visible=' + formatGeocode([maxX, maxY]).join(','));
     if (smallMarkers.length > 0) {
       markers.push('markers=' + smallMarkers.join('|'));
     }
@@ -298,13 +310,10 @@ var main = function(options, queryParams) {
         }
       } else {
         // Remove id and replace label.
-        if (idField.children.length > 1) {
-          Util.removeElement(idField.children[1]);
-          if (addressInfo.label !== undefined) {
-            idField.firstElementChild.textContent = addressInfo.label;
-          } else {
-            Util.removeElement(idField.firstElementChild);
-          }
+        if (addressInfo.label !== undefined) {
+          idField.textContent = addressInfo.label;
+        } else {
+          idField.textContent = '';
         }
         
         // Remove contacted.
@@ -451,7 +460,7 @@ var main = function(options, queryParams) {
     var mapSrc = bigMapSrc.replace(/\?&/g, '?');
     mapSrc = mapSrc.replace(
         'staticmap?',
-        'staticmap?center=' + formatGeocode([avgX, avgY], 5) + '&zoom=15&');
+        'staticmap?center=' + formatGeocode([avgX, avgY]).join(',') + '&zoom=15&');
     mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
     mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
     mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');

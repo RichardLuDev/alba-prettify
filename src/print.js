@@ -38,9 +38,13 @@ var main = function(options, queryParams) {
     return [parseFloat(geocode[0]), parseFloat(geocode[1])];
   }
   
+  var defaultDecimals = 3;
+  if (options[STORAGE_ACCURATE_MARKERS]) {
+    defaultDecimals = 4;
+  }
   var formatGeocode = function(geocode, decimals) {
     if (decimals === undefined) {
-      decimals = 3;
+      decimals = defaultDecimals;
     }
     return [geocode[0].toFixed(decimals),
             geocode[1].toFixed(decimals)];
@@ -222,7 +226,7 @@ var main = function(options, queryParams) {
           smallMarkers.push(addressInfo.geocode.join(','));
         } else {
           markers.push(
-            'markers=label:' + addressInfo.label + '|' + 
+            'markers=size:mid|label:' + addressInfo.label + '|' + 
             addressInfo.geocode.join(','));
         }
       }

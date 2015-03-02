@@ -199,11 +199,17 @@ var main = function(options, queryParams) {
   }
   
   var generateMarkers = function(lengthLimit) {
+    var seen = {};
     var markers = [];
     var smallMarkers = [];
     for (var idx = 0; idx < numAddresses; ++idx) {
       var addressInfo = addressData[orderedIds[idx]];
       if (addressInfo.label !== undefined) {
+        if (seen[addressInfo.label]) {
+          continue;
+        } else {
+          seen[addressInfo.label] = true;
+        }
         if (addressInfo.label === DOT) {
           smallMarkers.push(addressInfo.geocode.join(','));
         } else {

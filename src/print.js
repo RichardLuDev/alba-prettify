@@ -38,12 +38,12 @@ var main = function(options, queryParams) {
     return [parseFloat(geocode[0]), parseFloat(geocode[1])];
   }
   
-  var formatGeocode = function(geocode, precision) {
-    if (precision === undefined) {
-      precision = 6;
+  var formatGeocode = function(geocode, decimals) {
+    if (decimals === undefined) {
+      decimals = 3;
     }
-    return [geocode[0].toPrecision(precision),
-            geocode[1].toPrecision(precision)];
+    return [geocode[0].toFixed(decimals),
+            geocode[1].toFixed(decimals)];
   };
   
   var randomArrayChoice = function(array) {
@@ -177,24 +177,32 @@ var main = function(options, queryParams) {
     }
   }
   var markerLabelIdx = 0;
-  lastGeocode = [null, null];
-  var lastLabel = null;
+  var geocodeToLabel = {};
+  var serializeGeocode = function(geocode) {
+    return geocode[0] + '|' + geocode[1];
+  };
   for (var idx = 0; idx < numAddresses; ++idx) {
     var addressInfo = addressData[orderedIds[idx]];
+    var serialized = serializeGeocode(addressInfo.geocode);
     if (addressInfo.label === '') {
-      if (markerLabelIdx < markerLabels.length) {
-        addressInfo.label = markerLabels[markerLabelIdx++];
+      if (geocodeToLabel[serialized] !== undefined) {
+        addressInfo.label = geocodeToLabel[serialized];
       } else {
-        // Theoretically there should be at most one of these.
-        addressInfo.label = DOT;
+        if (markerLabelIdx < markerLabels.length) {
+          addressInfo.label = markerLabels[markerLabelIdx++];
+        } else {
+          // Theoretically there should be at most one of these.
+          addressInfo.label = DOT;
+        }
+        geocodeToLabel[serializeGeocode(addressInfo.geocode)] = addressInfo.label;
       }
-      lastGeocode = addressInfo.geocode;
-      lastLabel = addressInfo.label;
-    } else {
-      if (addressInfo.geocode[0] === lastGeocode[0] &&
-          addressInfo.geocode[1] === lastGeocode[1]) {
-        addressInfo.label = lastLabel;
-      }
+    }
+  }
+  for (var idx = 0; idx < numAddresses; ++idx) {
+    var addressInfo = addressData[orderedIds[idx]];
+    var serialized = serializeGeocode(addressInfo.geocode);
+    if (geocodeToLabel[serialized] !== undefined) {
+      addressInfo.label = geocodeToLabel[serialized];
     }
   }
   

@@ -3,6 +3,8 @@ var Util = (function() {
     getStreetFromAddress: function(address) {
       // /[,?#\d]* / - Matches the first bits of the street number, enforcing
       //    ending in space.
+      // /[,\d]+[a-zA-Z]? / - All street addresses need at least one number, possibly
+      //    followed by a unit letter.
       // /[\d]*[a-zA-Z]+(?!\d)/ - Street names can start with numbers, 1st,
       //    etc, but must not contain any letters followed by numbers, as
       //    those are postal codes.
@@ -10,7 +12,7 @@ var Util = (function() {
       //    which can start with any numbers (132nd) but cannot contain numbers in
       //    the middle or end, must have at least one letter (excludes US postal
       //    code), and possibly repeats with 'St W'.
-      return /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/.exec(address)[1].trim();
+      return /[,?#\d ]*[,\d]+[a-zA-Z]? ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/.exec(address)[1].trim();
     },
     
     parseQueryString: function(queryString) {

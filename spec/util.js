@@ -18,7 +18,11 @@ describe('Util.getStreetFromAddress', function(){
   });
   it('ignores unit numbers', function() {
     expectResult('1202, 111 Market St', 'Market St');
+    expectResult('1202B, 111 Market St', 'Market St');
     expectResult('PH5, 150 Market St', 'Market St');
     expectResult('? #1, 150 Market St', 'Market St');
+  });
+  it('ignores fully string unit numbers', function() {
+    expectResult('Unit B, 602 Goldthread St, Waterloo, ON', 'Goldthread St');
   });
 });

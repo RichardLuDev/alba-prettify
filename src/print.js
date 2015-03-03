@@ -214,6 +214,7 @@ var main = function(options, queryParams) {
     var seen = {};
     var markers = [];
     var smallMarkers = [];
+    var extras = 'color:gray|';
     for (var idx = 0; idx < numAddresses; ++idx) {
       var addressInfo = addressData[orderedIds[idx]];
       if (addressInfo.label !== undefined) {
@@ -225,7 +226,7 @@ var main = function(options, queryParams) {
         if (addressInfo.label === DOT) {
           smallMarkers.push(addressInfo.geocode.join(','));
         } else {
-          markers.push('markers=size:mid|label:' + addressInfo.label + '|' + 
+          markers.push('markers=' + extras + 'label:' + addressInfo.label + '|' + 
             addressInfo.geocode.join(','));
         }
       }
@@ -233,7 +234,7 @@ var main = function(options, queryParams) {
     markers.push('visible=' + formatGeocode([minX, minY]).join(','));
     markers.push('visible=' + formatGeocode([maxX, maxY]).join(','));
     if (smallMarkers.length > 0) {
-      markers.push('markers=size:mid|' + smallMarkers.join('|'));
+      markers.push('markers=' + extras + smallMarkers.join('|'));
     }
     return '&' + markers.join('&');
   };

@@ -9,9 +9,10 @@ describe('Util.getStreetFromAddress', function(){
   it('includes street direction', function() {
     expectResult('47 Caroline St N', 'Caroline St N');
   });
-  it('does not include Canadian postal code', function() {
+  it('does not include postal codes', function() {
     expectResult('47 Caroline St N, L8R 2R6', 'Caroline St N');
     expectResult('47 Caroline St N, L8R2R6', 'Caroline St N');
+    expectResult('47 Caroline St N, 15643', 'Caroline St N');
   });
   it('strips whitespace', function() {
     expectResult(' 47 Caroline St ', 'Caroline St');
@@ -21,8 +22,7 @@ describe('Util.getStreetFromAddress', function(){
     expectResult('1202B, 111 Market St', 'Market St');
     expectResult('PH5, 150 Market St', 'Market St');
     expectResult('? #1, 150 Market St', 'Market St');
-  });
-  it('ignores fully string unit numbers', function() {
-    expectResult('Unit B, 602 Goldthread St, Waterloo, ON', 'Goldthread St');
+    expectResult('Unit B, 602 Goldthread St', 'Goldthread St');
+    expectResult('Unit 1, 602 Goldthread St', 'Goldthread St');
   });
 });

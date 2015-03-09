@@ -1,5 +1,6 @@
 [Alba Prettify Extension](https://chrome.google.com/webstore/detail/alba-prettify/bclfehbjcncmedmofkfadkaobjjjmcme)
 =============
+[![Build Status](https://travis-ci.org/WhiteHalmos/alba-prettify.svg?branch=master)](https://travis-ci.org/WhiteHalmos/alba-prettify)
 
 [Discussion Group](https://groups.google.com/forum/#!forum/alba-prettify)
 

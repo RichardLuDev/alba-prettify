@@ -16,11 +16,11 @@ Util.getStreetFromAddress = function(address) {
   //    code), and possibly repeats with 'St W'.
   return /[,?#\d ]*[,\d]+[a-zA-Z]? ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/.exec(address)[1].trim();
 };
-    
+
 Util.replaceNumber = function(original, number) {
   return original.replace(/[\d]+/, number);
 };
-    
+
 Util.parseQueryString = function(queryString) {
   var params = {};
   var queries = queryString.split("&");
@@ -34,19 +34,19 @@ Util.parseQueryString = function(queryString) {
   }
   return params;
 };
-    
+
 Util.removeElement = function(element) {
   // Using parentNode instead of parentElement it covers the document case
   // as well.
   return element.parentNode.removeChild(element);
 };
-    
+
 Util.removeElements = function(elements) {
   for (var i = 0; i < elements.length; ++i) {
-    self.removeElement(elements[i]);
+    Util.removeElement(elements[i]);
   }
 };
-    
+
 Util.insertAfter = function(element, reference) {
   return reference.parentNode.insertBefore(element, reference.nextSibling);
 };

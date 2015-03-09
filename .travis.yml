@@ -1,1 +1,1 @@
-script: phantomjs spec/runtests.js spec/SpecRunner.html
+script: phantomjs spec/runtests.js SpecRunner.html

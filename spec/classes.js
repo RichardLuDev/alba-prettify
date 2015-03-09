@@ -1,3 +1,5 @@
+'use strict';
+
 describe('Prettify.Address', function(){
   var address;
   var status = Prettify.Address.Status.NEW;

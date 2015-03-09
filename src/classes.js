@@ -18,9 +18,9 @@ Prettify.Address.Status = {
 
 Prettify.Address.filter = function(addresses) {
   var goodAddresses = [];
-  for (let address of addresses) {
-    if (address.status !== Prettify.Address.Status.NOT_VALID) {
-      goodAddresses.push(address);
+  for (var i = 0; i < addresses.length; ++i) {
+    if (addresses[i].status !== Prettify.Address.Status.NOT_VALID) {
+      goodAddresses.push(addresses[i]);
     }
   }
   return goodAddresses;

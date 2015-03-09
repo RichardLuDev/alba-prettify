@@ -46,7 +46,7 @@
     "js": [
       "src/common.js",
       "src/util.js",
-      "src/print.js"
+      "src/printpage.js"
     ],
     "run_at": "document_start"
   }, {
@@ -59,7 +59,7 @@
     "js": [
       "src/common.js",
       "src/util.js",
-      "src/addresses.js"
+      "src/addressespage.js"
     ],
     "run_at": "document_end"
   }, {
@@ -71,7 +71,7 @@
     ],
     "js": [
       "src/common.js",
-      "src/assigned.js"
+      "src/assignedpage.js"
     ]
   }]
 }

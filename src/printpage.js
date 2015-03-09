@@ -56,6 +56,7 @@ var main = function(options, queryParams) {
   
   var orderedIds = [];
   var addressData = {};
+  var allAddresses = [];
   var addressRows = addressTable.querySelectorAll('tbody tr');
   var numAddresses = addressRows.length;
   for (var idx = 0; idx < numAddresses; ++idx) {
@@ -84,7 +85,7 @@ var main = function(options, queryParams) {
     geocode = formatGeocode(geocode);
     
     orderedIds.push(id);
-    addressData[id] = {
+    addressData[id] = new Prettify.Address({
       status: status,
       language: language,
       name: name,
@@ -92,7 +93,8 @@ var main = function(options, queryParams) {
       address: address,
       geocode: geocode,
       notes: notes,
-    };
+    });
+    allAddresses.push(addressData[id]);
   }
   
   var lastGeocode = [null, null];
@@ -433,6 +435,11 @@ var main = function(options, queryParams) {
     Util.removeElement(noteOrInfo);
     noteOrInfo = info;
   }
+  
+  // Must be info by now
+  var addressesText = noteOrInfo.querySelector('strong');
+  addressesText.textContent = Util.replaceNumber(
+      addressesText.textContent, Prettify.Address.filter(allAddresses).length);
   
   // Remove mobile QR code
   if (options[STORAGE_ADD_MOBILE_CODE]) {

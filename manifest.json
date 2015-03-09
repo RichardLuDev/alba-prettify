@@ -46,6 +46,7 @@
     "js": [
       "src/common.js",
       "src/util.js",
+      "src/classes.js",
       "src/printpage.js"
     ],
     "run_at": "document_start"

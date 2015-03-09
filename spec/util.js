@@ -26,3 +26,13 @@ describe('Util.getStreetFromAddress', function(){
     expectResult('Unit 1, 602 Goldthread St', 'Goldthread St');
   });
 });
+
+describe('Util.replaceNumber', function() {
+  var expectResult = function(from, toNumber, result) {
+    expect(Util.replaceNumber(from, toNumber)).toEqual(result);
+  };
+  
+  it('replaces single number at the beginning of the string', function() {
+    expectResult('34 addresses', 50, '50 addresses');
+  });
+});

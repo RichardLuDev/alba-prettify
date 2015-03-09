@@ -15,6 +15,10 @@ var Util = (function() {
       return /[,?#\d ]*[,\d]+[a-zA-Z]? ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/.exec(address)[1].trim();
     },
     
+    replaceNumber: function(original, number) {
+      return original.replace(/[\d]+/, number);
+    },
+    
     parseQueryString: function(queryString) {
       var params = {};
       var queries = queryString.split("&");

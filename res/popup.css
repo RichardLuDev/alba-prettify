@@ -2,6 +2,10 @@ div.wrapper {
   width: 215px;
 }
 
+.hidden {
+  display: none;
+}
+
 input {
   vertical-align: text-top;
 }

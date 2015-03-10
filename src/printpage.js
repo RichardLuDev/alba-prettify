@@ -34,10 +34,6 @@ var main = function(options, queryParams) {
   var mobileCodeParent = mobileCode.parentElement;
   var noteOrInfo = actualTitle.nextSibling;
   
-  var parseGeocode = function(geocode) {
-    return [parseFloat(geocode[0]), parseFloat(geocode[1])];
-  }
-  
   var defaultDecimals = 3;
   if (options[STORAGE_ACCURATE_MARKERS]) {
     defaultDecimals = 4;
@@ -81,7 +77,7 @@ var main = function(options, queryParams) {
         .replace(/°/g, '').split(' ');
     var notes = notesField.textContent;
     
-    geocode = parseGeocode(geocode);
+    geocode = geocode.map(parseFloat);
     geocode = formatGeocode(geocode);
     
     orderedIds.push(id);
@@ -96,27 +92,17 @@ var main = function(options, queryParams) {
     });
     allAddresses.push(addressData[id]);
   }
+  var goodAddresses = Prettify.Address.filter(allAddresses);
   
   var lastGeocode = [null, null];
   var lastAddress = null;
   var DOT = '•';
   var markerLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' + DOT;
   var NOT_VALID_STATUS = 'Not valid';
-  var avgX = 0, avgY = 0;
-  var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   var totalLocations = 0;
   var potentials = {};
   for (var idx = 0; idx < numAddresses; ++idx) {
     var addressInfo = addressData[orderedIds[idx]];
-    
-    var parsed = parseGeocode(addressInfo.geocode);
-    avgX += parsed[0];
-    avgY += parsed[1];
-    minX = Math.min(minX, parsed[0]);
-    minY = Math.min(minY, parsed[1]);
-    maxX = Math.max(maxX, parsed[0]);
-    maxY = Math.max(maxY, parsed[1]);
-    
     if (addressInfo.status !== NOT_VALID_STATUS &&
         (addressInfo.geocode[0] !== lastGeocode[0] ||
          addressInfo.geocode[1] !== lastGeocode[1])) {
@@ -130,10 +116,6 @@ var main = function(options, queryParams) {
       totalLocations += 1;
       lastGeocode = addressInfo.geocode;
     }
-  }
-  if (numAddresses !== 0) {
-    avgX /= numAddresses;
-    avgY /= numAddresses;
   }
   
   var markersLeft = markerLabels.length;
@@ -233,8 +215,9 @@ var main = function(options, queryParams) {
         }
       }
     };
-    markers.push('visible=' + formatGeocode([minX, minY]).join(','));
-    markers.push('visible=' + formatGeocode([maxX, maxY]).join(','));
+    var extremes = Prettify.Address.extremes(goodAddresses);
+    markers.push('visible=' + formatGeocode(extremes.min).join(','));
+    markers.push('visible=' + formatGeocode(extremes.max).join(','));
     if (smallMarkers.length > 0) {
       markers.push('markers=' + extras + smallMarkers.join('|'));
     }
@@ -439,7 +422,7 @@ var main = function(options, queryParams) {
   // Must be info by now
   var addressesText = noteOrInfo.querySelector('strong');
   addressesText.textContent = Util.replaceNumber(
-      addressesText.textContent, Prettify.Address.filter(allAddresses).length);
+      addressesText.textContent, goodAddresses.length);
   
   // Remove mobile QR code
   if (options[STORAGE_ADD_MOBILE_CODE]) {
@@ -483,9 +466,11 @@ var main = function(options, queryParams) {
     var newZoomMap = bigMap.cloneNode(true);
     // Cleanup unused fields.
     var mapSrc = bigMapSrc.replace(/\?&/g, '?');
+    
+    var extremes = Prettify.Address.extremes(goodAddresses);
     mapSrc = mapSrc.replace(
         'staticmap?',
-        'staticmap?center=' + formatGeocode([avgX, avgY]).join(',') + '&zoom=15&');
+        'staticmap?center=' + formatGeocode(extremes.avg).join(',') + '&zoom=15&');
     mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
     mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
     mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');

@@ -38,4 +38,3 @@ describe('Util.replaceNumber', function() {
     expectResult('34 addresses', 50, '50 addresses');
   });
 });
-

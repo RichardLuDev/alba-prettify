@@ -25,3 +25,27 @@ Prettify.Address.filter = function(addresses) {
   }
   return goodAddresses;
 };
+
+Prettify.Address.extremes = function(addresses) {
+  var minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  var avgX = 0, avgY = 0;
+  var geocode;
+  for (var i = 0; i < addresses.length; ++i) {
+    geocode = addresses[i].geocode.map(parseFloat);
+    minX = Math.min(minX, geocode[0]);
+    minY = Math.min(minY, geocode[1]);
+    maxX = Math.max(maxX, geocode[0]);
+    maxY = Math.max(maxY, geocode[1]);
+    avgX += geocode[0];
+    avgY += geocode[1];
+  }
+  if (addresses.length > 0) {
+    avgX /= addresses.length;
+    avgY /= addresses.length;
+  }
+  return {
+    avg: [avgX, avgY],
+    min: [minX, minY],
+    max: [maxX, maxY],
+  };
+};

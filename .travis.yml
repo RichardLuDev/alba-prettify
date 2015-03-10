@@ -1,1 +1,5 @@
 script: phantomjs spec/runtests.js SpecRunner.html
+notifications:
+  email:
+    on_success: change
+    on_failure: always

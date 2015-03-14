@@ -1,5 +1,7 @@
 'use strict';
 
+require('../src/classes.js');
+
 describe('Prettify.Address', function(){
   var address;
   var status = Prettify.Address.Status.NEW;

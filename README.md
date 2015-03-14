@@ -6,4 +6,8 @@
 
 A Chrome extension that improves Alba's territory printing output.
 
+Get node from: http://nodejs.org/dist/latest/node.exe
+Get npm from: http://nodejs.org/dist/npm/
+Update npm with `npm update npm -g`
+
 I try to follow the [Google Javascript Style Guide](https://google-styleguide.googlecode.com/svn/trunk/javascriptguide.xml).

@@ -1,5 +1,7 @@
 'use strict';
 
+require('../src/util.js');
+
 describe('Util.getStreetFromAddress', function(){
   var expectResult = function(address, street) {
     expect(Util.getStreetFromAddress(address)).toEqual(street);

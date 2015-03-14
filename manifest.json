@@ -3,12 +3,12 @@
 
   "name": "Alba Prettify",
   "description": "This extension improves Alba's territory printing page.",
-  "version": "0.13.2",
+  "version": "0.14.0",
 
   "icons": {
-    "16": "res/icon16.png",
-    "48": "res/icon48.png",
-    "128": "res/icon128.png"
+    "16": "icons/16.png",
+    "48": "icons/48.png",
+    "128": "icons/128.png"
   },
 
   "permissions": [
@@ -17,26 +17,26 @@
     "http://www.baseloc.com/"
   ],
   
-  "content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",
+  "content_security_policy": "script-scripts 'self' https://www.google-analytics.com; object-scripts 'self'",
   
   "web_accessible_resources": [
-    "res/print.css"
+    "css/print.css"
   ],
   
   "background": {
     "scripts": [
-      "src/common.js",
-      "src/background.js"
+      "scripts/require.js",
+      "scripts/backgroundpage.js"
     ]
   },
   
   "page_action": {
     "default_icon": {
-      "19": "res/icon19.png",
-      "38": "res/icon38.png"
+      "19": "icons/19.png",
+      "38": "icons/38.png"
     },
     "default_title": "Alba Prettify Options",
-    "default_popup": "src/popup.html"
+    "default_popup": "popup.html"
   },
 
   "content_scripts": [{
@@ -44,10 +44,8 @@
       "http://www.baseloc.com/alba/print/*"
     ],
     "js": [
-      "src/common.js",
-      "src/util.js",
-      "src/classes.js",
-      "src/printpage.js"
+      "scripts/require.js",
+      "scripts/printpage.js"
     ],
     "run_at": "document_start"
   }, {
@@ -55,12 +53,11 @@
       "http://www.baseloc.com/alba/addresses*"
     ],
     "css": [
-      "res/addresses.css"
+      "css/addresses.css"
     ],
     "js": [
-      "src/common.js",
-      "src/util.js",
-      "src/addressespage.js"
+      "scripts/require.js",
+      "scripts/addressespage.js"
     ],
     "run_at": "document_end"
   }, {
@@ -68,11 +65,11 @@
       "http://www.baseloc.com/alba/assigned*"
     ],
     "css": [
-      "res/assigned.css"
+      "css/assigned.css"
     ],
     "js": [
-      "src/common.js",
-      "src/assignedpage.js"
+      "scripts/require.js",
+      "scripts/assignedpage.js"
     ]
   }]
 }

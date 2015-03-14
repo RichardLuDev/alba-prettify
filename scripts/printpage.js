@@ -194,7 +194,7 @@ var main = function(options, queryParams) {
     }
   }
   
-  var generateMarkers = function(lengthLimit) {
+  var generateMarkers = function() {
     var seen = {};
     var markers = [];
     var smallMarkers = [];
@@ -455,8 +455,6 @@ var main = function(options, queryParams) {
     assignmentBox.classList.add('assignment-box');
     overallCard.insertBefore(assignmentBox, overallCard.firstChild);
   }
-  
-  var MAX_URL_LENGTH = 2048;
 
   // Move stats to first page.
   overallCard.insertBefore(actualTitle, bigMapParent);
@@ -477,7 +475,7 @@ var main = function(options, queryParams) {
     mapSrc = mapSrc.replace(/path=[^&]+&?/g, '');
     mapSrc = mapSrc.replace(/enc:[^&]+&?/g, '');
     if (!options[STORAGE_REMOVE_MARKERS]) {
-      mapSrc += generateMarkers(MAX_URL_LENGTH - mapSrc.length);
+      mapSrc += generateMarkers();
     }
     newZoomMap.src = mapSrc;
     Util.insertAfter(newZoomMap, bigMapParent);
@@ -500,7 +498,7 @@ var main = function(options, queryParams) {
       mapSrc = mapSrc.replace(/enc:[^&]+&?/g, '');
     }
     if (!options[STORAGE_REMOVE_MARKERS]) {
-      mapSrc += generateMarkers(MAX_URL_LENGTH - mapSrc.length);
+      mapSrc += generateMarkers();
     }
     bigMap.src = mapSrc;
   } else {

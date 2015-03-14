@@ -1,4 +1,7 @@
-script: phantomjs spec/runtests.js SpecRunner.html
+language: node_js
+node_js:
+  - '0.12'
+before_script: 
 notifications:
   email:
     on_success: change

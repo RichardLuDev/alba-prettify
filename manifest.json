@@ -3,7 +3,8 @@
 
   "name": "Alba Prettify",
   "description": "This extension improves Alba's territory printing page.",
-  "version": "0.14.0",
+  "default_locale": "en",
+  "version": "1.0.0",
 
   "icons": {
     "16": "icons/16.png",
@@ -26,7 +27,7 @@
   "background": {
     "scripts": [
       "scripts/require.js",
-      "scripts/backgroundpage.js"
+      "scripts/background-page.js"
     ]
   },
   
@@ -45,7 +46,7 @@
     ],
     "js": [
       "scripts/require.js",
-      "scripts/printpage.js"
+      "scripts/print-page.js"
     ],
     "run_at": "document_start"
   }, {
@@ -57,7 +58,7 @@
     ],
     "js": [
       "scripts/require.js",
-      "scripts/addressespage.js"
+      "scripts/addresses-page.js"
     ],
     "run_at": "document_end"
   }, {
@@ -69,7 +70,7 @@
     ],
     "js": [
       "scripts/require.js",
-      "scripts/assignedpage.js"
+      "scripts/assigned-page.js"
     ]
   }]
 }

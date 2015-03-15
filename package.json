@@ -1,23 +1,9 @@
 {
-  "name": "alba-prettify",
-  "description": "Chrome extension to improve Alba.",
-  "author": "Peter Wen",
-  "version": "1.0.0",
-  "license": [{
-    "type":       "MIT",
-    "url":        "https://raw.github.com/WhiteHalmos/alba-prettify/master/LICENSE"
-  }],
   "scripts": {
     "test": "jasmine"
   },
-  "homepage": "https://chrome.google.com/webstore/detail/alba-prettify/bclfehbjcncmedmofkfadkaobjjjmcme",
-  "bugs": "https://github.com/WhiteHalmos/alba-prettify/issues",
-  "homepage": "https://github.com/WhiteHalmos/alba-prettify",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/WhiteHalmos/alba-prettify.git"
-  },
-  "devDependencies": {
+  "repository": "https://github.com/WhiteHalmos/alba-prettify.git",
+  "dependencies": {
     "jasmine": "^2.2.1"
   }
 }

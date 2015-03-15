@@ -1,8 +1,8 @@
 'use strict';
 
-require('../src/util.js');
-
 describe('Util.getStreetFromAddress', function(){
+  var Util = require('../scripts/util');
+  
   var expectResult = function(address, street) {
     expect(Util.getStreetFromAddress(address)).toEqual(street);
   };
@@ -32,6 +32,8 @@ describe('Util.getStreetFromAddress', function(){
 });
 
 describe('Util.replaceNumber', function() {
+  var Util = require('../scripts/util');
+  
   var expectResult = function(from, toNumber, result) {
     expect(Util.replaceNumber(from, toNumber)).toEqual(result);
   };

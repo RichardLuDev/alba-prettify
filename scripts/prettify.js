@@ -1,4 +1,4 @@
-define(function() {
+module.exports = (function() {
   'use strict';
 
   var Prettify = function() {};
@@ -50,4 +50,4 @@ define(function() {
   };
   
   return Prettify;
-});
+})();

@@ -1,8 +1,8 @@
-define(function() {
+module.exports = (function() {
   'use strict';
 
-  // Analytics reporting functions
-  var Analytics = {};
+  var Analytics = function() {};
+  
   Analytics.recordEvent = function(category, action, label, value) {
     chrome.runtime.sendMessage({
       type: 'analytics',
@@ -33,4 +33,4 @@ define(function() {
   };
   
   return Analytics;
-});  // define
+})();

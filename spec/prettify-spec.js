@@ -1,8 +1,8 @@
 'use strict';
 
-require('../src/classes.js');
-
 describe('Prettify.Address', function(){
+  var Prettify = require('../scripts/prettify');
+  
   var address;
   var status = Prettify.Address.Status.NEW;
   var language = 'Chinese Mandarin';

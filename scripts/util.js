@@ -1,4 +1,4 @@
-define(function() {
+module.exports = (function() {
   'use strict';
 
   var Util = function() {};
@@ -53,5 +53,5 @@ define(function() {
   };
 
   return Util;
-});
+})();
 

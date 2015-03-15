@@ -1,4 +1,4 @@
-define(function() {
+module.exports = (function() {
   'use strict';
 
   // Debug flags
@@ -48,4 +48,4 @@ define(function() {
   Options[STORAGE_ADD_ZOOM_MAP] = true;
   Options[STORAGE_ADD_MOBILE_CODE] = false;
   Options[STORAGE_ADD_NOT_VALID_NAMES] = false;
-});  // define
+})();

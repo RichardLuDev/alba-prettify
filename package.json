@@ -1,9 +1,13 @@
 {
   "scripts": {
+    "lint": "jshint scripts",
+    "package": "",
     "test": "jasmine"
   },
   "repository": "https://github.com/WhiteHalmos/alba-prettify.git",
   "dependencies": {
-    "jasmine": "^2.2.1"
+    "browserify": "^9.0.3",
+    "jasmine": "^2.2.1",
+    "jshint": "^2.6.3"
   }
 }

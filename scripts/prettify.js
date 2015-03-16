@@ -1,6 +1,4 @@
 module.exports = (function() {
-  'use strict';
-
   var Prettify = function() {};
 
   // A single address.

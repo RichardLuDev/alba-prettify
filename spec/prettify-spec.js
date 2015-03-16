@@ -1,6 +1,4 @@
-'use strict';
-
-describe('Prettify.Address', function(){
+describe('Prettify.Address', function() {
   var Prettify = require('../scripts/prettify');
   
   var address;

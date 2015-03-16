@@ -1,8 +1,5 @@
 module.exports = (function() {
-  'use strict';
-
-  var Analytics = function() {};
-  
+  var Analytics = {};
   Analytics.recordEvent = function(category, action, label, value) {
     chrome.runtime.sendMessage({
       type: 'analytics',
@@ -31,6 +28,5 @@ module.exports = (function() {
       },
     });
   };
-  
   return Analytics;
 })();

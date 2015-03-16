@@ -1,5 +1,3 @@
-'use strict';
-
 describe('Util.getStreetFromAddress', function(){
   var Util = require('../scripts/util');
   

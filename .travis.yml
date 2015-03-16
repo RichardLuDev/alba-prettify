@@ -6,6 +6,7 @@ install:
 script:
   - npm run lint
   - npm run test
+  - npm run package
 notifications:
   email:
     on_success: change

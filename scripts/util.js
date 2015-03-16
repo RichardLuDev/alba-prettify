@@ -1,6 +1,4 @@
 module.exports = (function() {
-  'use strict';
-
   var Util = function() {};
 
   Util.getStreetFromAddress = function(address) {

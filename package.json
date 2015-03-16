@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "lint": "jshint scripts",
+    "lint": "jshint scripts spec",
     "package": "",
     "test": "jasmine"
   },

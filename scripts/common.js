@@ -1,17 +1,6 @@
 module.exports = (function() {
-  'use strict';
-
   // Debug flags
   var DEBUG_ANALYTICS = false;
-
-  // Extension property shortcuts
-  var Extension = {};
-  Extension.getVersion = function() {
-    return chrome.runtime.getManifest().version;
-  };
-  Extension.isDevMode = function() {
-    return !('update_url' in chrome.runtime.getManifest());
-  };
 
   var ADDED_BY = 'Added by Alba Prettify';
 

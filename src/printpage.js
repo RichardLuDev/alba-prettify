@@ -14,8 +14,8 @@ var main = function(options, queryParams) {
   var overallCard = document.querySelector('.card');
   var actualTitle = document.querySelector('.card > h1');
   var possibleBadge = actualTitle.querySelector('.badge');
-  if (possibleBadge && possibleBadge.textContent.search('Telephone') !== -1) {
-    // Do no work for telephone territories.
+  if (possibleBadge && possibleBadge.textContent.search('Assigned') !== -1) {
+    // Do no work for assigned territories.
     return;
   }
   
@@ -29,10 +29,16 @@ var main = function(options, queryParams) {
   var mobileCode = overallCard.querySelector('.directions');
   var addressTable = overallCard.querySelector('.addresses');
   var bigMapParent = bigMap.parentElement;
-  var firstLegend = mobileCode.nextSibling;
   var brElements = document.querySelectorAll('.card > br');
   var mobileCodeParent = mobileCode.parentElement;
   var noteOrInfo = actualTitle.nextSibling;
+  
+  if (mobileCode.parentElement != overallCard) {
+    var mobileCodeParent = mobileCode.parentElement;
+    overallCard.insertBefore(mobileCode, mobileCodeParent);
+    Util.removeElement(mobileCodeParent);
+  }
+  var firstLegend = mobileCode.nextSibling;
   
   var defaultDecimals = 3;
   if (options[STORAGE_ACCURATE_MARKERS]) {
@@ -239,14 +245,15 @@ var main = function(options, queryParams) {
     var thead = addressTable.getElementsByTagName('thead')[0];
     var headingRow = thead.getElementsByTagName('tr')[0];
     var headings = thead.getElementsByTagName('th');
+    for (var i = headings.length - 1; i >= 0; --i) {
+      if (headings[i].textContent.toLowerCase() === 'name & telephone') {
+        headings[i].textContent = 'CONTACT';
+        break;
+      }
+    }
     if (idx === INVALID_TABLE) {
       // Remove all but the status and address columns for invalids.
       for (var i = headings.length - 1; i >= 0; --i) {
-        if (headings[i].textContent.toLowerCase() === 'name & telephone' &&
-            options[STORAGE_ADD_NOT_VALID_NAMES]) {
-          headings[i].textContent = 'NAME';
-          continue;
-        }
         if (headings[i].textContent.toLowerCase() !== 'language' &&
             headings[i].textContent.toLowerCase() !== 'address' &&
             headings[i].textContent.toLowerCase() !== 'notes') {
@@ -260,17 +267,6 @@ var main = function(options, queryParams) {
       }
       // Add CSS class to separate the tables
       addressTable.classList.add('invalid');
-    } else {
-      if (options[STORAGE_REMOVE_NAMES]) {
-        // Remove 'Name' in 'Name & Telephone'.
-        for (var i = 0; i < headings.length; ++i) {
-          if (headings[i].textContent.toLowerCase() ===
-              'name & telephone') {
-            headings[i].textContent = 'TELEPHONE';
-            break;
-          }
-        }
-      }
     }
     
     var tbody = addressTable.getElementsByTagName('tbody')[0];

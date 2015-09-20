@@ -27,6 +27,9 @@ describe('Util.getStreetFromAddress', function(){
     expectResult('Unit B, 602 Goldthread St', 'Goldthread St');
     expectResult('Unit 1, 602 Goldthread St', 'Goldthread St');
   });
+  it('ignores city', function() {
+    expectResult('47 Caroline St N, Waterloo', 'Caroline St N');
+  });
 });
 
 describe('Util.replaceNumber', function() {

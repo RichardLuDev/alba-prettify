@@ -27,7 +27,8 @@ var main = function(options, queryParams) {
   }
   
   var mobileCode = overallCard.querySelector('.directions');
-  var addressTable = overallCard.querySelector('.addresses');
+  var addressTable = overallCard.querySelector('table.addresses');
+  var coopTable = overallCard.querySelector('table.other');
   var bigMapParent = bigMap.parentElement;
   var brElements = document.querySelectorAll('.card > br');
   var mobileCodeParent = mobileCode.parentElement;
@@ -60,8 +61,7 @@ var main = function(options, queryParams) {
   var addressData = {};
   var allAddresses = [];
   var addressRows = addressTable.querySelectorAll('tbody tr');
-  var numAddresses = addressRows.length;
-  for (var idx = 0; idx < numAddresses; ++idx) {
+  for (var idx = 0; idx < addressRows.length; ++idx) {
     var addressRow = addressRows[idx];
     var addressCells = addressRow.children;
     
@@ -100,16 +100,55 @@ var main = function(options, queryParams) {
   }
   var goodAddresses = Prettify.Address.filter(allAddresses);
   
+  var coopIds = [];
+  if (coopTable != null) {
+    if (options[STORAGE_INCLUDE_COOP]) {
+      var coopRows = coopTable.querySelectorAll('tbody tr');
+      for (var idx = 0; idx < coopRows.length; ++idx) {
+        var coopRow = coopRows[idx];
+        var coopCells = coopRow.children;
+        
+        var idField = coopCells[0];
+        var statusField = coopCells[1];
+        var accountField = coopCells[2];
+        var languageField = coopCells[3];
+        var nameAndTelephoneField = coopCells[4];
+        var addressField = coopCells[5];
+        
+        var id = idField.querySelector('.muted').textContent;
+        var status = statusField.querySelector('.status').textContent;
+        var account = accountField.textContent;
+        var language = languageField.textContent;
+        var name = nameAndTelephoneField.querySelector('strong').textContent;
+        var telephone = nameAndTelephoneField.childNodes[0].nodeValue;
+        var address = addressField.childNodes[0].textContent.trim();  // Text Node
+        
+        orderedIds.push(id);
+        coopIds.push(id);
+        addressData[id] = new Prettify.Address({
+          status: Prettify.Address.Status.NOT_VALID,  // Force not valid for coop calls
+          language: language,
+          name: name,
+          telephone: telephone,
+          address: address,
+          geocode: [0, 0],
+          notes: '[' + account + ']',
+        });
+        allAddresses.push(addressData[id]);
+      }
+    }
+    Util.removeElement(coopTable);
+  }
+  
   var lastGeocode = [null, null];
   var lastAddress = null;
   var DOT = '•';
   var markerLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' + DOT;
-  var NOT_VALID_STATUS = 'Not valid';
   var totalLocations = 0;
   var potentials = {};
-  for (var idx = 0; idx < numAddresses; ++idx) {
+  for (var idx = 0; idx < orderedIds.length; ++idx) {
     var addressInfo = addressData[orderedIds[idx]];
-    if (addressInfo.status !== NOT_VALID_STATUS &&
+    if (addressInfo.status !== Prettify.Address.Status.NOT_VALID &&
         (addressInfo.geocode[0] !== lastGeocode[0] ||
          addressInfo.geocode[1] !== lastGeocode[1])) {
       var address = Util.getStreetFromAddress(addressInfo.address);
@@ -175,7 +214,7 @@ var main = function(options, queryParams) {
   var serializeGeocode = function(geocode) {
     return geocode[0] + '|' + geocode[1];
   };
-  for (var idx = 0; idx < numAddresses; ++idx) {
+  for (var idx = 0; idx < orderedIds.length; ++idx) {
     var addressInfo = addressData[orderedIds[idx]];
     var serialized = serializeGeocode(addressInfo.geocode);
     if (addressInfo.label === '') {
@@ -192,7 +231,7 @@ var main = function(options, queryParams) {
       }
     }
   }
-  for (var idx = 0; idx < numAddresses; ++idx) {
+  for (var idx = 0; idx < orderedIds.length; ++idx) {
     var addressInfo = addressData[orderedIds[idx]];
     var serialized = serializeGeocode(addressInfo.geocode);
     if (geocodeToLabel[serialized] !== undefined) {
@@ -205,7 +244,7 @@ var main = function(options, queryParams) {
     var markers = [];
     var smallMarkers = [];
     var extras = 'color:gray|';
-    for (var idx = 0; idx < numAddresses; ++idx) {
+    for (var idx = 0; idx < orderedIds.length; ++idx) {
       var addressInfo = addressData[orderedIds[idx]];
       if (addressInfo.label !== undefined) {
         if (seen[addressInfo.label]) {
@@ -232,6 +271,22 @@ var main = function(options, queryParams) {
   
   var newTable = document.createElement('div');
   var invalidAddressTable = addressTable.cloneNode(true);
+  if (coopIds) {
+    var normalRow = addressTable.querySelector('tbody tr');
+    // Assuming that there is at least one normal call.
+    for (var idx = 0; idx < coopIds.length; ++idx) {
+      var addressInfo = addressData[coopIds[idx]];
+      var newRow = normalRow.cloneNode(true);
+      
+      newRow.children[2].innerHTML = addressInfo.language;
+      newRow.children[4].innerHTML = addressInfo.address;
+      newRow.children[5].innerHTML = addressInfo.notes;
+      
+      // Append to tbody.
+      invalidAddressTable.children[1].appendChild(newRow);
+    }
+  }
+  
   newTable.appendChild(invalidAddressTable);
   var subheading = document.createElement('h2');
   subheading.textContent = 'Not Valid Calls';
@@ -285,8 +340,8 @@ var main = function(options, queryParams) {
       
       var status = statusField.textContent;
       // Separate rows based on table.
-      if ((idx === INVALID_TABLE && status !== NOT_VALID_STATUS) ||
-          (idx === VALID_TABLE && status === NOT_VALID_STATUS)) {
+      if ((idx === INVALID_TABLE && status !== Prettify.Address.Status.NOT_VALID) ||
+          (idx === VALID_TABLE && status === Prettify.Address.Status.NOT_VALID)) {
         Util.removeElement(trs[i]);
         continue;
       }
@@ -547,6 +602,7 @@ optionsReady.then(function(options) {
     l: '1',  // Legend
     d: '1',  // Mobile QR code
     g: '1',  // GPS coordinates
+    coop: '1',  // Co-op calls
   };
   for (var key in requiredParams) {
     if (params[key] === undefined ||

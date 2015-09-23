@@ -2,5 +2,5 @@ sudo: false
 script: phantomjs spec/runtests.js SpecRunner.html
 notifications:
   email:
-    on_success: change
+    on_success: never
     on_failure: always

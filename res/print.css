@@ -79,7 +79,7 @@ table.addresses tr.dark td {
 
 div.legend {
   border: 1px solid black;
-  margin-bottom: 5px;
+  margin: 5px;
 }
 
 div.legend > p {

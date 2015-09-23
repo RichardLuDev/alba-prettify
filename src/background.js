@@ -37,7 +37,7 @@ chrome.runtime.onInstalled.addListener(function(details) {
     chrome.declarativeContent.onPageChanged.addRules([{
       conditions: [
         new chrome.declarativeContent.PageStateMatcher({
-          pageUrl: { urlMatches: 'http://www.baseloc.com/alba/print/*' },
+          pageUrl: { urlMatches: 'http://www.baseloc.com/alba/print*' },
         }),
       ],
       actions: [ new chrome.declarativeContent.ShowPageAction() ],

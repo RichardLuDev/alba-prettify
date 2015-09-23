@@ -76,3 +76,13 @@ table.addresses tr.light td {
 table.addresses tr.dark td {
   background-color: #f9f9f9;
 }
+
+div.legend {
+  border: 1px solid black;
+  margin-bottom: 5px;
+}
+
+div.legend > p {
+  font-size: 8pt;
+  margin: 5px;
+}

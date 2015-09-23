@@ -558,6 +558,30 @@ var main = function(options, queryParams) {
     Util.removeElement(bigMapParent);
   }
   
+  if (options[STORAGE_ADD_CHINESE_LEGEND]) {
+    let legend = document.createElement('div');
+    legend.classList.add('legend');
+    legend.innerHTML = `
+<p>
+  <strong>NN</strong>
+  <span class="muted">NEW NUMBER: EMPTY BOX - SCOUTED, MARKED BOX - CONFIRMED</span>
+</p>
+<p>
+  <strong>NC</strong>
+  <span class="muted">NOT CHINESE</span>
+</p>
+<p>
+  <strong>NCS</strong>
+  <span class="muted">NOT CHINESE SPEAKER SPEAKING ENGLISH ONLY</span>
+</p>
+<p>
+  <strong>NCS-LANGUAGE NAME</strong>
+  <span class="muted">NOT CHINESE SPEAKER SPEAKING LANGUAGE OTHER THAN ENGLISH</span>
+</p>
+`;
+    overallCard.insertBefore(legend, addressTable);
+  }
+  
   loadPrintCss();
   Analytics.recordPageView();
 };

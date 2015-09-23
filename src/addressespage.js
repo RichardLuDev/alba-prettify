@@ -172,7 +172,14 @@ var addSaveButton = function() {
   exportButton.parentElement.insertBefore(saveElement, exportButton);
   saveElement.disabled = true;
   
-  saveElement.addEventListener('click', function(e) {
+  saveElement.addEventListener('click', function onClick(e) {
+    // Prevent page from reloading.
+    e.preventDefault();
+    
+    // Prevent double downloading.
+    saveElement.removeEventListener('click', onClick);
+    Util.removeElement(saveElement);
+    
     // Download the textarea as file.
     var text = document.querySelector('#export').textContent;
     var blob = new Blob([text], {type: 'text/plain'});
@@ -182,8 +189,6 @@ var addSaveButton = function() {
     link.download = name;
     link.href = window.URL.createObjectURL(blob);
     link.click();
-    // Prevent page from reloading.
-    e.preventDefault();
     
     Analytics.recordEvent(ADDRESSES, 'click', SAVE_ID);
   });

@@ -563,20 +563,16 @@ var main = function(options, queryParams) {
     legend.classList.add('legend');
     legend.innerHTML = `
 <p>
-  <strong>NN</strong>
-  <span class="muted">NEW NUMBER: EMPTY BOX - SCOUTED, MARKED BOX - CONFIRMED</span>
+  <strong>NC (Not Chinese):</strong>
+  <span class="muted">Householder does not speak Chinese and does not look Chinese</span>
 </p>
 <p>
-  <strong>NC</strong>
-  <span class="muted">NOT CHINESE</span>
+  <strong>NCS (Not Chinese Speaking):</strong>
+  <span class="muted">Householder does not speak Chinese but looks Chinese. Indicate ethnicity if possible.</span>
 </p>
 <p>
-  <strong>NCS</strong>
-  <span class="muted">NOT CHINESE SPEAKER SPEAKING ENGLISH ONLY</span>
-</p>
-<p>
-  <strong>NCS-LANGUAGE NAME</strong>
-  <span class="muted">NOT CHINESE SPEAKER SPEAKING LANGUAGE OTHER THAN ENGLISH</span>
+  <strong>NN (New Number):</strong>
+  <span class="muted">Newly found address. Draw crossed box beside number if householder was contacted. Draw empty box if not.</span>
 </p>
 `;
     overallCard.insertBefore(legend, addressTable);

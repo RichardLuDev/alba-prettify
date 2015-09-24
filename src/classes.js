@@ -14,6 +14,7 @@ Prettify.Address = function(properties) {
 Prettify.Address.Status = {
   NEW: 'New',
   NOT_VALID: 'Not valid',
+  VALID: 'Valid',
 };
 
 Prettify.Address.filter = function(addresses) {

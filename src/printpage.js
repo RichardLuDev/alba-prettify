@@ -35,7 +35,6 @@ var main = function(options, queryParams) {
   var noteOrInfo = actualTitle.nextSibling;
   
   if (mobileCode.parentElement != overallCard) {
-    var mobileCodeParent = mobileCode.parentElement;
     overallCard.insertBefore(mobileCode, mobileCodeParent);
     Util.removeElement(mobileCodeParent);
   }
@@ -103,25 +102,29 @@ var main = function(options, queryParams) {
   var coopIds = [];
   if (coopTable != null) {
     if (options[STORAGE_INCLUDE_COOP]) {
-      var coopRows = coopTable.querySelectorAll('tbody tr');
-      for (var idx = 0; idx < coopRows.length; ++idx) {
-        var coopRow = coopRows[idx];
-        var coopCells = coopRow.children;
+      let coopRows = coopTable.querySelectorAll('tbody tr');
+      for (let idx = 0; idx < coopRows.length; ++idx) {
+        let coopRow = coopRows[idx];
+        let coopCells = coopRow.children;
         
-        var idField = coopCells[0];
-        var statusField = coopCells[1];
-        var accountField = coopCells[2];
-        var languageField = coopCells[3];
-        var nameAndTelephoneField = coopCells[4];
-        var addressField = coopCells[5];
+        let idField = coopCells[0];
+        let statusField = coopCells[1];
+        let accountField = coopCells[2];
+        let languageField = coopCells[3];
+        let nameAndTelephoneField = coopCells[4];
+        let addressField = coopCells[5];
         
-        var id = idField.querySelector('.muted').textContent;
-        var status = statusField.querySelector('.status').textContent;
-        var account = accountField.textContent;
-        var language = languageField.textContent;
-        var name = nameAndTelephoneField.querySelector('strong').textContent;
-        var telephone = nameAndTelephoneField.childNodes[0].nodeValue;
-        var address = addressField.childNodes[0].textContent.trim();  // Text Node
+        let id = idField.querySelector('.muted').textContent;
+        let status = statusField.querySelector('.status').textContent;
+        let account = accountField.textContent;
+        let language = languageField.textContent;
+        let name = nameAndTelephoneField.querySelector('strong').textContent;
+        let telephone = nameAndTelephoneField.childNodes[0].nodeValue;
+        let address = addressField.childNodes[0].textContent.trim();  // Text Node
+        
+        if (status != Prettify.Address.Status.VALID) {
+          continue;
+        }
         
         orderedIds.push(id);
         coopIds.push(id);
@@ -132,8 +135,8 @@ var main = function(options, queryParams) {
           telephone: telephone,
           address: address,
           geocode: [0, 0],
-          notes: '[' + account + ']',
         });
+        
         allAddresses.push(addressData[id]);
       }
     }
@@ -272,15 +275,20 @@ var main = function(options, queryParams) {
   var newTable = document.createElement('div');
   var invalidAddressTable = addressTable.cloneNode(true);
   if (coopIds) {
-    var normalRow = addressTable.querySelector('tbody tr');
+    let normalRow = addressTable.querySelector('tbody tr');
     // Assuming that there is at least one normal call.
-    for (var idx = 0; idx < coopIds.length; ++idx) {
-      var addressInfo = addressData[coopIds[idx]];
-      var newRow = normalRow.cloneNode(true);
+    for (let idx = 0; idx < coopIds.length; ++idx) {
+      let addressInfo = addressData[coopIds[idx]];
+      let newRow = normalRow.cloneNode(true);
       
+      newRow.children[1].innerHTML = addressInfo.status;
       newRow.children[2].innerHTML = addressInfo.language;
       newRow.children[4].innerHTML = addressInfo.address;
-      newRow.children[5].innerHTML = addressInfo.notes;
+      newRow.children[5].innerHTML = '';
+      
+      for (let i = 0; i < newRow.children.length; ++i) {
+        newRow.children[i].classList.add('muted');
+      }
       
       // Append to tbody.
       invalidAddressTable.children[1].appendChild(newRow);
@@ -295,12 +303,12 @@ var main = function(options, queryParams) {
   var INVALID_TABLE = 1;
   var addressTables = [addressTable, invalidAddressTable];
   for (var idx = addressTables.length - 1; idx >= 0; idx--) {
-    var addressTable = addressTables[idx];
+    let table = addressTables[idx];
     
-    var thead = addressTable.getElementsByTagName('thead')[0];
-    var headingRow = thead.getElementsByTagName('tr')[0];
-    var headings = thead.getElementsByTagName('th');
-    for (var i = headings.length - 1; i >= 0; --i) {
+    let thead = table.getElementsByTagName('thead')[0];
+    let headingRow = thead.getElementsByTagName('tr')[0];
+    let headings = thead.getElementsByTagName('th');
+    for (let i = headings.length - 1; i >= 0; --i) {
       if (headings[i].textContent.toLowerCase() === 'name & telephone') {
         headings[i].textContent = 'CONTACT';
         break;
@@ -308,7 +316,7 @@ var main = function(options, queryParams) {
     }
     if (idx === INVALID_TABLE) {
       // Remove all but the status and address columns for invalids.
-      for (var i = headings.length - 1; i >= 0; --i) {
+      for (let i = headings.length - 1; i >= 0; --i) {
         if (headings[i].textContent.toLowerCase() !== 'language' &&
             headings[i].textContent.toLowerCase() !== 'address' &&
             headings[i].textContent.toLowerCase() !== 'notes') {
@@ -316,29 +324,29 @@ var main = function(options, queryParams) {
         }
       }
       // Duplicate headings for second row.
-      var len = headings.length;
-      for (var i = 0; i < len; ++i) {
+      let len = headings.length;
+      for (let i = 0; i < len; ++i) {
         headingRow.appendChild(headings[i].cloneNode(true));
       }
       // Add CSS class to separate the tables
-      addressTable.classList.add('invalid');
+      table.classList.add('invalid');
     }
     
-    var tbody = addressTable.getElementsByTagName('tbody')[0];
-    var trs = tbody.getElementsByTagName('tr');
-    for (var i = trs.length - 1; i >= 0; --i) {
-      var idField = trs[i].children[0];
-      var id = idField.querySelector('.muted').textContent;
-      var addressInfo = addressData[id];
+    let tbody = table.getElementsByTagName('tbody')[0];
+    let trs = tbody.getElementsByTagName('tr');
+    for (let i = trs.length - 1; i >= 0; --i) {
+      let idField = trs[i].children[0];
+      let id = idField.querySelector('.muted').textContent;
+      let addressInfo = addressData[id];
       
-      var statusField = trs[i].children[1];
-      var language = trs[i].children[2];
-      var nameAndTelephone = trs[i].children[3];
-      var address = trs[i].children[4];
-      var notes = trs[i].children[5];
-      var checkboxes = trs[i].children[6];
+      let statusField = trs[i].children[1];
+      let language = trs[i].children[2];
+      let nameAndTelephone = trs[i].children[3];
+      let address = trs[i].children[4];
+      let notes = trs[i].children[5];
+      let checkboxes = trs[i].children[6];
       
-      var status = statusField.textContent;
+      let status = statusField.textContent;
       // Separate rows based on table.
       if ((idx === INVALID_TABLE && status !== Prettify.Address.Status.NOT_VALID) ||
           (idx === VALID_TABLE && status === Prettify.Address.Status.NOT_VALID)) {
@@ -371,14 +379,14 @@ var main = function(options, queryParams) {
         }
         
         // Remove contacted.
-        var contactedDate = nameAndTelephone.querySelector('small');
+        let contactedDate = nameAndTelephone.querySelector('small');
         if (contactedDate) {
           Util.removeElement(contactedDate);
         }
         
         if (options[STORAGE_REMOVE_NAMES]) {
           // Remove name.
-          var strongName = nameAndTelephone.querySelector('strong');
+          let strongName = nameAndTelephone.querySelector('strong');
           if (strongName) {
             Util.removeElement(strongName);
           }
@@ -386,7 +394,7 @@ var main = function(options, queryParams) {
       }
       
       // Bold language column.
-      var languageText = language.textContent;
+      let languageText = language.textContent;
       if (languageText.indexOf('Chinese') !== -1) {
         // Chinese is redundant for Mandarin and Cantonese.
         languageText = languageText.split(' ')[1];
@@ -395,7 +403,7 @@ var main = function(options, queryParams) {
 
       // Remove geocode for both.
       if (options[STORAGE_REMOVE_GEOCODE]) {
-        var geocodeSpan = address.querySelector('span');
+        let geocodeSpan = address.querySelector('span');
         if (geocodeSpan) {
           Util.removeElement(geocodeSpan);
         }
@@ -487,9 +495,9 @@ var main = function(options, queryParams) {
   
   // Remove legend
   if (options[STORAGE_REMOVE_LEGEND]) {
-    var next = firstLegend;
+    let next = firstLegend;
     while (next && next.tagName !== 'TABLE') {
-      var toRemove = next;
+      let toRemove = next;
       next = next.nextSibling;
       Util.removeElement(toRemove);
     }
@@ -500,7 +508,7 @@ var main = function(options, queryParams) {
   
   // Add assignment box with Name and stuff.
   if (options[STORAGE_ADD_ASSIGNMENT_BOX]) {
-    var assignmentBox = document.createElement('DIV');
+    let assignmentBox = document.createElement('DIV');
     assignmentBox.innerHTML =
         'Name:<span class="assignment-box-separator"></span>Return By:';
     assignmentBox.classList.add('assignment-box');

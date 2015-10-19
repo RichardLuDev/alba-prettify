@@ -397,7 +397,10 @@ var main = function(options, queryParams) {
       let languageText = language.textContent;
       if (languageText.indexOf('Chinese') !== -1) {
         // Chinese is redundant for Mandarin and Cantonese.
-        languageText = languageText.split(' ')[1];
+        let potentialReplacement = languageText.split(' ')[1];
+        if (potentialReplacement) {
+          languageText = potentialReplacement;
+        }
       }
       language.innerHTML = '<strong>' + languageText + '</strong>';
 

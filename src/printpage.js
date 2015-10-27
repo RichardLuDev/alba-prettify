@@ -52,10 +52,6 @@ var main = function(options, queryParams) {
             geocode[1].toFixed(decimals)];
   };
   
-  var randomArrayChoice = function(array) {
-    return array[Math.floor(Math.random() * array.length)];
-  }
-  
   var orderedIds = [];
   var addressData = {};
   var allAddresses = [];
@@ -70,7 +66,7 @@ var main = function(options, queryParams) {
     var nameAndTelephoneField = addressCells[3];
     var addressField = addressCells[4];
     var notesField = addressCells[5];
-    var boxesField = addressCells[6];
+    //var boxesField = addressCells[6];
     
     var id = idField.querySelector('.muted').textContent;
     var status = statusField.querySelector('.status').textContent;
@@ -317,11 +313,15 @@ var main = function(options, queryParams) {
     if (idx === INVALID_TABLE) {
       // Remove all but the status and address columns for invalids.
       for (let i = headings.length - 1; i >= 0; --i) {
-        if (headings[i].textContent.toLowerCase() !== 'language' &&
-            headings[i].textContent.toLowerCase() !== 'address' &&
-            headings[i].textContent.toLowerCase() !== 'notes') {
-          Util.removeElement(headings[i]);
+        if (headings[i].textContent.toLowerCase() === 'language' ||
+            headings[i].textContent.toLowerCase() === 'address' ||
+            headings[i].textContent.toLowerCase() === 'notes') {
+          continue;
+        } else if (options[STORAGE_ADD_NOT_VALID_NAMES] &&
+            headings[i].textContent.toLowerCase() === 'contact') {
+          continue;
         }
+        Util.removeElement(headings[i]);
       }
       // Duplicate headings for second row.
       let len = headings.length;

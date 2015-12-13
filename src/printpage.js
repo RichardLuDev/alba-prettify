@@ -31,14 +31,28 @@ var main = function(options, queryParams) {
   var coopTable = overallCard.querySelector('table.other');
   var bigMapParent = bigMap.parentElement;
   var brElements = document.querySelectorAll('.card > br');
-  var mobileCodeParent = mobileCode.parentElement;
   var noteOrInfo = actualTitle.nextSibling;
   
-  if (mobileCode.parentElement != overallCard) {
-    overallCard.insertBefore(mobileCode, mobileCodeParent);
-    Util.removeElement(mobileCodeParent);
+  var firstLegend;
+  if (mobileCode) {
+    var mobileCodeParent = mobileCode.parentElement;
+    if (mobileCode.parentElement != overallCard) {
+      overallCard.insertBefore(mobileCode, mobileCodeParent);
+      Util.removeElement(mobileCodeParent);
+    }
+    firstLegend = mobileCode.nextSibling;
+    // Remove mobile QR code
+    if (options[STORAGE_ADD_MOBILE_CODE]) {
+      overallCard.insertBefore(mobileCode, overallCard.firstChild);
+    } else {
+      if (mobileCode.firstElementChild) {
+        mobileCode.firstElementChild.src = '';
+      }
+      Util.removeElement(mobileCode);
+    }
+  } else {
+    firstLegend = brElements[0].nextSibling.nextSibling;
   }
-  var firstLegend = mobileCode.nextSibling;
   
   var defaultDecimals = 3;
   if (options[STORAGE_ACCURATE_MARKERS]) {
@@ -485,16 +499,6 @@ var main = function(options, queryParams) {
   var addressesText = noteOrInfo.querySelector('strong');
   addressesText.textContent = Util.replaceNumber(
       addressesText.textContent, goodAddresses.length);
-  
-  // Remove mobile QR code
-  if (options[STORAGE_ADD_MOBILE_CODE]) {
-    overallCard.insertBefore(mobileCode, overallCard.firstChild);
-  } else {
-    if (mobileCode.firstElementChild) {
-      mobileCode.firstElementChild.src = '';
-    }
-    Util.removeElement(mobileCode);
-  }
   
   // Remove legend
   if (options[STORAGE_REMOVE_LEGEND]) {

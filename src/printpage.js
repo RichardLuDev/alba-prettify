@@ -31,7 +31,20 @@ var main = function(options, queryParams) {
   var coopTable = overallCard.querySelector('table.other');
   var bigMapParent = bigMap.parentElement;
   var brElements = document.querySelectorAll('.card > br');
-  var noteOrInfo = actualTitle.nextSibling;
+  var note = null;
+  var info = null;
+  
+  {
+    let noteOrInfo = actualTitle.nextSibling;
+    if (noteOrInfo.children.length === 1 &&
+        noteOrInfo.children[0].tagName === 'STRONG' &&
+        noteOrInfo.children[0].textContent === 'Notes:') {
+      note = noteOrInfo;
+      info = noteOrInfo.nextSibling;
+    } else {
+      info = noteOrInfo;
+    }
+  }
   
   var firstLegend;
   if (mobileCode) {
@@ -481,22 +494,20 @@ var main = function(options, queryParams) {
   // Move campaign text out of its wrapper.
   var campaignText = overallCard.querySelector('.campaign');
   if (campaignText && campaignText.parentElement !== overallCard) {
-    var campaignTextParent = campaignText.parentElement;
+    let campaignTextParent = campaignText.parentElement;
     overallCard.insertBefore(campaignText, overallCard.firstChild);
     Util.removeElement(campaignTextParent);
   }
   
   // Remove territory notes
-  if (noteOrInfo.children.length === 1 &&
-      noteOrInfo.children[0].tagName === 'STRONG' &&
-      noteOrInfo.children[0].textContent === 'Notes:') {
-    var info = noteOrInfo.nextSibling;
-    Util.removeElement(noteOrInfo);
-    noteOrInfo = info;
+  
+  if (!options[STORAGE_DISPLAY_TERRITORY_NOTES]) {
+    Util.removeElement(note);
+    note = null;
   }
   
   // Must be info by now
-  var addressesText = noteOrInfo.querySelector('strong');
+  var addressesText = info.querySelector('strong');
   addressesText.textContent = Util.replaceNumber(
       addressesText.textContent, goodAddresses.length);
   
@@ -526,7 +537,10 @@ var main = function(options, queryParams) {
 
   // Move stats to first page.
   overallCard.insertBefore(actualTitle, bigMapParent);
-  overallCard.insertBefore(noteOrInfo, bigMapParent);
+  if (note != null)
+    overallCard.insertBefore(note, bigMapParent);
+  if (info != null)
+    overallCard.insertBefore(info, bigMapParent);
   
   if (options[STORAGE_ADD_ZOOM_MAP]) {
     var newZoomMap = bigMap.cloneNode(true);

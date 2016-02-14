@@ -32,6 +32,7 @@ var STORAGE_ADD_MOBILE_CODE = 'add-mobile-code';
 var STORAGE_ADD_NOT_VALID_NAMES = 'add-not-valid-names';
 var STORAGE_INCLUDE_COOP = 'include-coop';
 var STORAGE_ADD_CHINESE_LEGEND = 'add-chinese-legend';
+var STORAGE_DISPLAY_TERRITORY_NOTES = 'display-territory-notes';
 
 // Options: ID -> default value
 var Options = {};
@@ -51,6 +52,7 @@ Options[STORAGE_ADD_MOBILE_CODE] = false;
 Options[STORAGE_ADD_NOT_VALID_NAMES] = false;
 Options[STORAGE_INCLUDE_COOP] = true;
 Options[STORAGE_ADD_CHINESE_LEGEND] = false;
+Options[STORAGE_DISPLAY_TERRITORY_NOTES] = false;
 
 // Analytics reporting functions
 var Analytics = {};

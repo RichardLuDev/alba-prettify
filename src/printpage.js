@@ -2,7 +2,7 @@
 
 // Add custom CSS.
 var loadPrintCss = function() {
-  var cssLink = document.createElement('link');
+  let cssLink = document.createElement('link');
   cssLink.rel = 'stylesheet';
   cssLink.href = chrome.extension.getURL('res/print.css');
   document.head.appendChild(cssLink);
@@ -11,28 +11,28 @@ var loadPrintCss = function() {
 var main = function(options, queryParams) {
   /* Grab all elements that are to be manipulated later. */
   
-  var overallCard = document.querySelector('.card');
-  var actualTitle = document.querySelector('.card > h1');
-  var possibleBadge = actualTitle.querySelector('.badge');
+  let overallCard = document.querySelector('.card');
+  let actualTitle = document.querySelector('.card > h1');
+  let possibleBadge = actualTitle.querySelector('.badge');
   if (possibleBadge && possibleBadge.textContent.search('Assigned') !== -1) {
     // Do no work for assigned territories.
     return;
   }
   
   // Stop map loading ASAP.
-  var bigMap = overallCard.querySelector('.map');
-  var bigMapSrc = bigMap.src;
+  let bigMap = overallCard.querySelector('.map');
+  let bigMapSrc = bigMap.src;
   if (options[STORAGE_ADD_MAP] || options[STORAGE_ADD_ZOOM_MAP]) {
     bigMap.src = '';
   }
   
-  var mobileCode = overallCard.querySelector('.directions');
-  var addressTable = overallCard.querySelector('table.addresses');
-  var coopTable = overallCard.querySelector('table.other');
-  var bigMapParent = bigMap.parentElement;
-  var brElements = document.querySelectorAll('.card > br');
-  var note = null;
-  var info = null;
+  let mobileCode = overallCard.querySelector('.directions');
+  let addressTable = overallCard.querySelector('table.addresses');
+  let coopTable = overallCard.querySelector('table.other');
+  let bigMapParent = bigMap.parentElement;
+  let brElements = document.querySelectorAll('.card > br');
+  let note = null;
+  let info = null;
   
   {
     let noteOrInfo = actualTitle.nextSibling;
@@ -46,9 +46,9 @@ var main = function(options, queryParams) {
     }
   }
   
-  var firstLegend;
+  let firstLegend;
   if (mobileCode) {
-    var mobileCodeParent = mobileCode.parentElement;
+    let mobileCodeParent = mobileCode.parentElement;
     if (mobileCode.parentElement != overallCard) {
       overallCard.insertBefore(mobileCode, mobileCodeParent);
       Util.removeElement(mobileCodeParent);
@@ -67,11 +67,11 @@ var main = function(options, queryParams) {
     firstLegend = brElements[0].nextSibling.nextSibling;
   }
   
-  var defaultDecimals = 3;
+  let defaultDecimals = 3;
   if (options[STORAGE_ACCURATE_MARKERS]) {
     defaultDecimals = 4;
   }
-  var formatGeocode = function(geocode, decimals) {
+  let formatGeocode = function(geocode, decimals) {
     if (decimals === undefined) {
       decimals = defaultDecimals;
     }
@@ -79,31 +79,31 @@ var main = function(options, queryParams) {
             geocode[1].toFixed(decimals)];
   };
   
-  var orderedIds = [];
-  var addressData = {};
-  var allAddresses = [];
-  var addressRows = addressTable.querySelectorAll('tbody tr');
-  for (var idx = 0; idx < addressRows.length; ++idx) {
-    var addressRow = addressRows[idx];
-    var addressCells = addressRow.children;
+  let orderedIds = [];
+  let addressData = {};
+  let allAddresses = [];
+  let addressRows = addressTable.querySelectorAll('tbody tr');
+  for (let idx = 0; idx < addressRows.length; ++idx) {
+    let addressRow = addressRows[idx];
+    let addressCells = addressRow.children;
     
-    var idField = addressCells[0];
-    var statusField = addressCells[1];
-    var languageField = addressCells[2];
-    var nameAndTelephoneField = addressCells[3];
-    var addressField = addressCells[4];
-    var notesField = addressCells[5];
-    //var boxesField = addressCells[6];
+    let idField = addressCells[0];
+    let statusField = addressCells[1];
+    let languageField = addressCells[2];
+    let nameAndTelephoneField = addressCells[3];
+    let addressField = addressCells[4];
+    let notesField = addressCells[5];
+    //let boxesField = addressCells[6];
     
-    var id = idField.querySelector('.muted').textContent;
-    var status = statusField.querySelector('.status').textContent;
-    var language = languageField.textContent;
-    var name = nameAndTelephoneField.querySelector('strong').textContent;
-    var telephone = nameAndTelephoneField.querySelector('span').textContent;
-    var address = addressField.childNodes[0].textContent.trim();  // Text Node
-    var geocode = addressField.querySelector('span').textContent
+    let id = idField.querySelector('.muted').textContent;
+    let status = statusField.querySelector('.status').textContent;
+    let language = languageField.textContent;
+    let name = nameAndTelephoneField.querySelector('strong').textContent;
+    let telephone = nameAndTelephoneField.querySelector('span').textContent;
+    let address = addressField.childNodes[0].textContent.trim();  // Text Node
+    let geocode = addressField.querySelector('span').textContent
         .replace(/°/g, '').split(' ');
-    var notes = notesField.textContent;
+    let notes = notesField.textContent;
     
     geocode = geocode.map(parseFloat);
     geocode = formatGeocode(geocode);
@@ -120,9 +120,9 @@ var main = function(options, queryParams) {
     });
     allAddresses.push(addressData[id]);
   }
-  var goodAddresses = Prettify.Address.filter(allAddresses);
+  let goodAddresses = Prettify.Address.filter(allAddresses);
   
-  var coopIds = [];
+  let coopIds = [];
   if (coopTable != null) {
     if (options[STORAGE_INCLUDE_COOP]) {
       let coopRows = coopTable.querySelectorAll('tbody tr');
@@ -166,18 +166,18 @@ var main = function(options, queryParams) {
     Util.removeElement(coopTable);
   }
   
-  var lastGeocode = [null, null];
-  var lastAddress = null;
-  var DOT = '•';
-  var markerLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' + DOT;
-  var totalLocations = 0;
-  var potentials = {};
-  for (var idx = 0; idx < orderedIds.length; ++idx) {
-    var addressInfo = addressData[orderedIds[idx]];
+  let lastGeocode = [null, null];
+  let lastAddress = null;
+  let DOT = '•';
+  let markerLabels = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' + DOT;
+  let totalLocations = 0;
+  let potentials = {};
+  for (let idx = 0; idx < orderedIds.length; ++idx) {
+    let addressInfo = addressData[orderedIds[idx]];
     if (addressInfo.status !== Prettify.Address.Status.NOT_VALID &&
         (addressInfo.geocode[0] !== lastGeocode[0] ||
          addressInfo.geocode[1] !== lastGeocode[1])) {
-      var address = Util.getStreetFromAddress(addressInfo.address);
+      let address = Util.getStreetFromAddress(addressInfo.address);
       if (lastAddress !== address) {
         potentials[address] = [addressInfo];
         lastAddress = address;
@@ -189,31 +189,31 @@ var main = function(options, queryParams) {
     }
   }
   
-  var markersLeft = markerLabels.length;
-  var totalAddresses = Object.keys(potentials).length;
+  let markersLeft = markerLabels.length;
+  let totalAddresses = Object.keys(potentials).length;
   if (markersLeft < totalAddresses) {
-    for (var key in potentials) {
-      var addressInfos = potentials[key];
+    for (let key in potentials) {
+      let addressInfos = potentials[key];
       if (markersLeft > 0) {
         addressInfos[0].label = '';
         markersLeft--;
       }
     }
   } else if (markersLeft >= totalLocations) {
-    for (var key in potentials) {
-      var addressInfos = potentials[key];
-      for (var i = 0; i < addressInfos.length; ++i) {
+    for (let key in potentials) {
+      let addressInfos = potentials[key];
+      for (let i = 0; i < addressInfos.length; ++i) {
         addressInfos[i].label = '';
       }
     }
   } else {
-    var allotted = {};
-    for (var key in potentials) {
+    let allotted = {};
+    for (let key in potentials) {
       allotted[key] = 0;
     }
     while (markersLeft > 0) {
-      for (var key in potentials) {
-        var addressInfos = potentials[key];
+      for (let key in potentials) {
+        let addressInfos = potentials[key];
         if (markersLeft > 0 && allotted[key] < addressInfos.length) {
           allotted[key] += 1;
           markersLeft--;
@@ -223,11 +223,11 @@ var main = function(options, queryParams) {
     // We want to hit the first and last items, if possible.
     // Given 3 more addresses to pick out of 8, 8/3 ~= 2.66
     // Ideally we pick 0, 2/3, 4/5, 7.
-    for (var key in potentials) {
-      var addressInfos = potentials[key];
-      var got = allotted[key];
-      var skip = (addressInfos.length - 1) / (got - 1);
-      for (var i = 0; i < addressInfos.length; i += skip) {
+    for (let key in potentials) {
+      let addressInfos = potentials[key];
+      let got = allotted[key];
+      let skip = (addressInfos.length - 1) / (got - 1);
+      for (let i = 0; i < addressInfos.length; i += skip) {
         if (got > 0) {
           addressInfos[Math.floor(i)].label = '';
           got--;
@@ -235,14 +235,14 @@ var main = function(options, queryParams) {
       }
     }
   }
-  var markerLabelIdx = 0;
-  var geocodeToLabel = {};
-  var serializeGeocode = function(geocode) {
+  let markerLabelIdx = 0;
+  let geocodeToLabel = {};
+  let serializeGeocode = function(geocode) {
     return geocode[0] + '|' + geocode[1];
   };
-  for (var idx = 0; idx < orderedIds.length; ++idx) {
-    var addressInfo = addressData[orderedIds[idx]];
-    var serialized = serializeGeocode(addressInfo.geocode);
+  for (let idx = 0; idx < orderedIds.length; ++idx) {
+    let addressInfo = addressData[orderedIds[idx]];
+    let serialized = serializeGeocode(addressInfo.geocode);
     if (addressInfo.label === '') {
       if (geocodeToLabel[serialized] !== undefined) {
         addressInfo.label = geocodeToLabel[serialized];
@@ -257,21 +257,21 @@ var main = function(options, queryParams) {
       }
     }
   }
-  for (var idx = 0; idx < orderedIds.length; ++idx) {
-    var addressInfo = addressData[orderedIds[idx]];
-    var serialized = serializeGeocode(addressInfo.geocode);
+  for (let idx = 0; idx < orderedIds.length; ++idx) {
+    let addressInfo = addressData[orderedIds[idx]];
+    let serialized = serializeGeocode(addressInfo.geocode);
     if (geocodeToLabel[serialized] !== undefined) {
       addressInfo.label = geocodeToLabel[serialized];
     }
   }
   
-  var generateMarkers = function(lengthLimit) {
-    var seen = {};
-    var markers = [];
-    var smallMarkers = [];
-    var extras = 'color:gray|';
-    for (var idx = 0; idx < orderedIds.length; ++idx) {
-      var addressInfo = addressData[orderedIds[idx]];
+  let generateMarkers = function(lengthLimit) {
+    let seen = {};
+    let markers = [];
+    let smallMarkers = [];
+    let extras = 'color:gray|';
+    for (let idx = 0; idx < orderedIds.length; ++idx) {
+      let addressInfo = addressData[orderedIds[idx]];
       if (addressInfo.label !== undefined) {
         if (seen[addressInfo.label]) {
           continue;
@@ -286,7 +286,7 @@ var main = function(options, queryParams) {
         }
       }
     };
-    var extremes = Prettify.Address.extremes(goodAddresses);
+    let extremes = Prettify.Address.extremes(goodAddresses);
     markers.push('visible=' + formatGeocode(extremes.min).join(','));
     markers.push('visible=' + formatGeocode(extremes.max).join(','));
     if (smallMarkers.length > 0) {
@@ -295,8 +295,8 @@ var main = function(options, queryParams) {
     return '&' + markers.join('&');
   };
   
-  var newTable = document.createElement('div');
-  var invalidAddressTable = addressTable.cloneNode(true);
+  let newTable = document.createElement('div');
+  let invalidAddressTable = addressTable.cloneNode(true);
   if (coopIds) {
     let normalRow = addressTable.querySelector('tbody tr');
     // Assuming that there is at least one normal call.
@@ -319,13 +319,13 @@ var main = function(options, queryParams) {
   }
   
   newTable.appendChild(invalidAddressTable);
-  var subheading = document.createElement('h2');
+  let subheading = document.createElement('h2');
   subheading.textContent = 'Not Valid Calls';
   newTable.insertBefore(subheading, newTable.firstChild);
-  var VALID_TABLE = 0;
-  var INVALID_TABLE = 1;
-  var addressTables = [addressTable, invalidAddressTable];
-  for (var idx = addressTables.length - 1; idx >= 0; idx--) {
+  let VALID_TABLE = 0;
+  let INVALID_TABLE = 1;
+  let addressTables = [addressTable, invalidAddressTable];
+  for (let idx = addressTables.length - 1; idx >= 0; idx--) {
     let table = addressTables[idx];
     
     let thead = table.getElementsByTagName('thead')[0];
@@ -406,9 +406,11 @@ var main = function(options, queryParams) {
         }
         
         // Remove contacted.
-        let contactedDate = nameAndTelephone.querySelector('small');
-        if (contactedDate) {
-          Util.removeElement(contactedDate);
+        if (!options[STORAGE_DISPLAY_LAST_CONTACTED]) {
+          let contactedDate = nameAndTelephone.querySelector('small');
+          if (contactedDate) {
+            Util.removeElement(contactedDate);
+          }
         }
         
         if (options[STORAGE_REMOVE_NAMES]) {
@@ -442,18 +444,18 @@ var main = function(options, queryParams) {
     
     // Split invalid table into two.
     if (idx === INVALID_TABLE) {
-      var mid = Math.ceil(trs.length / 2);
-      for (var i = 0; i < mid; ++i) {
-        var curRow = trs[i];
+      let mid = Math.ceil(trs.length / 2);
+      for (let i = 0; i < mid; ++i) {
+        let curRow = trs[i];
         // Account for odd numbered tables.
         if (mid >= trs.length) {
-          for (var j = curRow.children.length - 1; j >= 0; --j) {
+          for (let j = curRow.children.length - 1; j >= 0; --j) {
             curRow.appendChild(document.createElement('td'));
           }
           break;
         }
-        var nextRow = trs[mid];
-        for (var j = 0; j < nextRow.children.length; ++j) {
+        let nextRow = trs[mid];
+        for (let j = 0; j < nextRow.children.length; ++j) {
           curRow.appendChild(nextRow.children[j].cloneNode(true));
         }
         Util.removeElement(nextRow);
@@ -467,14 +469,14 @@ var main = function(options, queryParams) {
       //    those are postal codes.
       // ((?:[\d]*[a-zA-Z]+(?!\d) ?)*) - Capture the full street name,
       //    possibly repeats with 'St W'.
-      var STREET_ADDRESS = /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/;
-      var CSS_CLASSES = ['light', 'dark'];
-      var css_index = 1;
-      for (var i = 0; i < trs.length - 1; ++i) {
+      let STREET_ADDRESS = /[,?#\d ]* ((?:[\d]*[a-zA-Z]+(?!\d) ?)*)/;
+      let CSS_CLASSES = ['light', 'dark'];
+      let css_index = 1;
+      for (let i = 0; i < trs.length - 1; ++i) {
         trs[i].classList.add(CSS_CLASSES[css_index]);
-        var curStreet = Util.getStreetFromAddress(
+        let curStreet = Util.getStreetFromAddress(
             trs[i].children[4].textContent);
-        var nextStreet = Util.getStreetFromAddress(
+        let nextStreet = Util.getStreetFromAddress(
             trs[i + 1].children[4].textContent);
         if (curStreet !== nextStreet) {
           css_index = 1 - css_index;
@@ -492,7 +494,7 @@ var main = function(options, queryParams) {
   }
   
   // Move campaign text out of its wrapper.
-  var campaignText = overallCard.querySelector('.campaign');
+  let campaignText = overallCard.querySelector('.campaign');
   if (campaignText && campaignText.parentElement !== overallCard) {
     let campaignTextParent = campaignText.parentElement;
     overallCard.insertBefore(campaignText, overallCard.firstChild);
@@ -507,7 +509,7 @@ var main = function(options, queryParams) {
   }
   
   // Must be info by now
-  var addressesText = info.querySelector('strong');
+  let addressesText = info.querySelector('strong');
   addressesText.textContent = Util.replaceNumber(
       addressesText.textContent, goodAddresses.length);
   
@@ -533,7 +535,7 @@ var main = function(options, queryParams) {
     overallCard.insertBefore(assignmentBox, overallCard.firstChild);
   }
   
-  var MAX_URL_LENGTH = 2048;
+  let MAX_URL_LENGTH = 2048;
 
   // Move stats to first page.
   overallCard.insertBefore(actualTitle, bigMapParent);
@@ -543,11 +545,11 @@ var main = function(options, queryParams) {
     overallCard.insertBefore(info, bigMapParent);
   
   if (options[STORAGE_ADD_ZOOM_MAP]) {
-    var newZoomMap = bigMap.cloneNode(true);
+    let newZoomMap = bigMap.cloneNode(true);
     // Cleanup unused fields.
-    var mapSrc = bigMapSrc.replace(/\?&/g, '?');
+    let mapSrc = bigMapSrc.replace(/\?&/g, '?');
     
-    var extremes = Prettify.Address.extremes(goodAddresses);
+    let extremes = Prettify.Address.extremes(goodAddresses);
     mapSrc = mapSrc.replace(
         'staticmap?',
         'staticmap?center=' + formatGeocode(extremes.avg).join(',') + '&zoom=15&');
@@ -563,7 +565,7 @@ var main = function(options, queryParams) {
     Util.insertAfter(newZoomMap, bigMapParent);
     
     if (options[STORAGE_ADD_MAP]) {
-      var title2 = actualTitle.cloneNode(true);
+      let title2 = actualTitle.cloneNode(true);
       title2.children[1].textContent += ' Zoomed-In';
       overallCard.insertBefore(title2, newZoomMap);
     }
@@ -571,7 +573,7 @@ var main = function(options, queryParams) {
   
   if (options[STORAGE_ADD_MAP]) {
     // Cleanup unused fields.
-    var mapSrc = bigMapSrc.replace(/\?&/g, '?');
+    let mapSrc = bigMapSrc.replace(/\?&/g, '?');
     mapSrc = mapSrc.replace(/format=[^&]+&?/g, '');
     mapSrc = mapSrc.replace(/sensor=[^&]+&?/g, '');
     mapSrc = mapSrc.replace(/markers=[^&]+&?/g, '');
@@ -622,8 +624,8 @@ var documentReady = new Promise(function documentReadyPromise(resolve) {
 var optionsReady = new Promise(function optionsReadyPromise(resolve) {
   chrome.storage.sync.get(Object.keys(Options), function(items) {
     if (items[STORAGE_ENABLE_EXTENSION] !== false) {
-      var options = {};
-      for (var property in Options) {
+      let options = {};
+      for (let property in Options) {
         if (items[property] !== undefined) {
           options[property] = items[property];
         } else {
@@ -642,9 +644,9 @@ optionsReady.then(function(options) {
     return;
   }
   // Enforce we load the right page with as much data as possible.
-  var params = Util.parseQueryString(location.search.substring(1));
-  var needRefresh = false;
-  var requiredParams = {
+  let params = Util.parseQueryString(location.search.substring(1));
+  let needRefresh = false;
+  let requiredParams = {
     nv: '',  // Show all non-valid calls
     m: '1',  // Primary map
     o: '0',  // Overview map
@@ -653,7 +655,7 @@ optionsReady.then(function(options) {
     g: '1',  // GPS coordinates
     coop: '1',  // Co-op calls
   };
-  for (var key in requiredParams) {
+  for (let key in requiredParams) {
     if (params[key] === undefined ||
         params[key] !== requiredParams[key]) {
       params[key] = requiredParams[key];
@@ -661,8 +663,8 @@ optionsReady.then(function(options) {
     }
   }
   if (needRefresh) {
-    var queryString = [];
-    for (var key in params) {
+    let queryString = [];
+    for (let key in params) {
       queryString.push(key + '=' + params[key]);
     }
     location.replace(
@@ -679,7 +681,7 @@ documentReady.then(function() {
     if (areaName !== 'sync') {
       return;
     }
-    for (var property in changes) {
+    for (let property in changes) {
       if (Options[property] === undefined) {
         continue;
       }

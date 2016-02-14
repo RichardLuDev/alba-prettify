@@ -13,11 +13,6 @@ var main = function(options, queryParams) {
   
   let overallCard = document.querySelector('.card');
   let actualTitle = document.querySelector('.card > h1');
-  let possibleBadge = actualTitle.querySelector('.badge');
-  if (possibleBadge && possibleBadge.textContent.search('Assigned') !== -1) {
-    // Do no work for assigned territories.
-    return;
-  }
   
   // Stop map loading ASAP.
   let bigMap = overallCard.querySelector('.map');
@@ -503,7 +498,7 @@ var main = function(options, queryParams) {
   
   // Remove territory notes
   
-  if (!options[STORAGE_DISPLAY_TERRITORY_NOTES]) {
+  if (note != null && !options[STORAGE_DISPLAY_TERRITORY_NOTES]) {
     Util.removeElement(note);
     note = null;
   }
